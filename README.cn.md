@@ -4,8 +4,7 @@
 Elite CS 系列机器人的SDK。
 
 ## Requirements
- * **EliRobot & EliServer** (机器人的控制软件) version >=**2.10.x**(for CS-Series). 
-   如果机器人的控制软件版本低于此，建议升级之。  
+ * **RT ROBOT & RT SERVER* (机器人的控制软件) version >=**2.13.x**(for CS-Series). 如果机器人的控制软件版本低于此，建议升级之。  
  * SDK中的socket使用了 **boost::asio**。 因此需要安装 **boost** 库。
  * 此SDK需要支持 C++17 或 C++14 的编译器。注意，如果是C++14的标准，会使用到`boost::variant`。
  * cmake版本 >=3.22.1
