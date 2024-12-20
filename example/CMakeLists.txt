@@ -20,7 +20,7 @@ foreach(SOURCE ${SOURCES})
     )
     target_link_libraries(
         ${ELITE_SDK_EXAMPLE_NAME} 
-        elite_robot_client
+        elite-cs-series-sdk
         ${SYSTEM_LIB}
     )
     target_link_directories(
