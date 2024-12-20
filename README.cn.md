@@ -17,7 +17,7 @@ mkdir build && cd build
 cmake ..
 cmake --build ./
 ```
-编译完成后会得到`libelite_robot_client_static.lib` 和 `libelite_robot_client.dll` 两个库文件，以及包括了头文件的`include`文件夹。
+编译完成后会得到`libelite-cs-series-sdk_static.lib` 和 `libelite-cs-series-sdk.dll` 两个库文件，以及包括了头文件的`include`文件夹。
 
 对于Linux平台，可以使用下面步骤编译与安装：
 ```bash

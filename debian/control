@@ -1,0 +1,20 @@
+Source: elite-cs-series-sdk
+Section: libs
+Priority: optional
+Maintainer: Elite Robots <elite@elibot.cn>
+Build-Depends: 
+  debhelper-compat (= 13), 
+  cmake(>= 3.22.1),
+  libboost-all-dev(>=1.58)
+Standards-Version: 4.6.0
+Homepage: https://www.eliterobots.com/
+Vcs-Browser: https://github.com/Elite-Robots/Elite_Robots_CS_SDK
+Vcs-Git: https://github.com/Elite-Robots/Elite_Robots_CS_SDK.git
+Rules-Requires-Root: no
+
+Package: elite-cs-series-sdk
+Architecture: amd64
+Depends: 
+  ${shlibs:Depends},
+  ${misc:Depends}
+Description: Elite Robots CS Series SDK.

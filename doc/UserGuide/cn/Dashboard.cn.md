@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
 使用gcc编译器，编译`dashboard_example.cpp`：
 ```bash
-g++ dashboard_example.cpp -o dashboard_example -lelite_robot_client
+g++ dashboard_example.cpp -o dashboard_example -lelite-cs-series-sdk
 ```
 
 运行编译出来的二进制程序：

@@ -121,7 +121,7 @@ int main(int argc, const char **argv) {
 
 使用gcc编译器，编译`primary_example.cpp`：
 ```bash
-g++ primary_example.cpp -o primary_example -lelite_robot_client
+g++ primary_example.cpp -o primary_example -lelite-cs-series-sdk
 ```
 
 执行编译结果

@@ -120,7 +120,7 @@ int main(int argc, const char** argv) {
 
 使用gcc编译器，编译`elite_driver_example.cpp`：
 ```bash
-g++ elite_driver_example.cpp -o elite_driver_example -lelite_robot_client
+g++ elite_driver_example.cpp -o elite_driver_example -lelite-cs-series-sdk
 ```
 
 拷贝`example/resource/`下的两个RTSI配方文件到当前目录。  
