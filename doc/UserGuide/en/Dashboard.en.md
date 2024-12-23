@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
 Compile `dashboard_example.cpp` using the gcc compiler:
 ```bash
-g++ dashboard_example.cpp -o dashboard_example -lelite_robot_client
+g++ dashboard_example.cpp -o dashboard_example -lelite-cs-series-sdk
 ```
 
 Run the compiled binary program:

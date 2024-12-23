@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
 使用gcc编译器，编译`rtsi_base_example.cpp`：
 ```bash
-g++ rtsi_base_example.cpp -o rtsi_base_example -lelite_robot_client
+g++ rtsi_base_example.cpp -o rtsi_base_example -lelite-cs-series-sdk
 ```
 
 运行编译出来的二进制程序：
@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
 
 使用gcc编译器，编译`rtsi_io_example.cpp`：
 ```bash
-g++ rtsi_io_example.cpp -o rtsi_io_example -lelite_robot_client
+g++ rtsi_io_example.cpp -o rtsi_io_example -lelite-cs-series-sdk
 ```
 
 在执行编译结果之前，创建两个配方文件：

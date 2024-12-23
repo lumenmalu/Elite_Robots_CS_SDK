@@ -120,7 +120,7 @@ int main(int argc, const char** argv) {
 
 Compile `elite_driver_example.cpp` using the gcc compiler:
 ```bash
-g++ elite_driver_example.cpp -o elite_driver_example -lelite_robot_client
+g++ elite_driver_example.cpp -o elite_driver_example -lelite-cs-series-sdk
 ```
 
 Copy the two RTSI recipe files under `example/resource/` to the current directory.

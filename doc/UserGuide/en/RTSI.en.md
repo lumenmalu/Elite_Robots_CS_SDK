@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
 Compile `rtsi_base_example.cpp` using the gcc compiler:
 ```bash
-g++ rtsi_base_example.cpp -o rtsi_base_example -lelite_robot_client
+g++ rtsi_base_example.cpp -o rtsi_base_example -lelite-cs-series-sdk
 ```
 
 Run the compiled binary program:
@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
 
 Compile `rtsi_io_example.cpp` using the gcc compiler:
 ```bash
-g++ rtsi_io_example.cpp -o rtsi_io_example -lelite_robot_client
+g++ rtsi_io_example.cpp -o rtsi_io_example -lelite-cs-series-sdk
 ```
 
 Before executing the compilation result, create two recipe files:

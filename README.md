@@ -17,7 +17,7 @@ mkdir build && cd build
 cmake..
 cmake --build./
 ```
-After compilation, two library files, `libelite_robot_client_static.lib` and `libelite_robot_client.dll`, and an `include` folder containing header files will be obtained.
+After compilation, two library files, `libelite-cs-series-sdk_static.lib` and `libelite-cs-series-sdk.dll`, and an `include` folder containing header files will be obtained.
 
 For the Linux platform, you can use the following steps to compile and install:
 ```bash

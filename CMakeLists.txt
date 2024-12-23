@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.5)
 
-project(elite_robot_client VERSION 1.1.0)
+project(elite-cs-series-sdk VERSION 1.1.0)
 
 include(cmake/utils.cmake)
 

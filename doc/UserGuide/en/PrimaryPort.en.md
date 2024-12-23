@@ -121,7 +121,7 @@ int main(int argc, const char **argv) {
 
 Compile `primary_example.cpp` using the gcc compiler:
 ```bash
-g++ primary_example.cpp -o primary_example -lelite_robot_client
+g++ primary_example.cpp -o primary_example -lelite-cs-series-sdk
 ```
 
 Execute the compilation result:
