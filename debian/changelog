@@ -1,3 +1,8 @@
+elite-cs-series-sdk (1.1.0-focal-1) focal; urgency=medium
+  * Version 1.1.0 release on focal.
+
+ -- Elite Robots <elite@elibot.cn>  Fri, 20 Dec 2024 14:29:14 +0800
+
 elite-cs-series-sdk (1.1.0-2) noble; urgency=medium
   * Version 1.1.0 release on noble.
 
