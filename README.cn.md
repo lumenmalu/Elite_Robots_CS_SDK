@@ -9,7 +9,14 @@ Elite CS 系列机器人的SDK。
  * 此SDK需要支持 C++17 或 C++14 的编译器。注意，如果是C++14的标准，会使用到`boost::variant`。
  * cmake版本 >=3.22.1
 
-## Build
+## Build & Install
+如果你的操作系统是 Ubuntu20.04、Ubuntu22.04、Ubuntu24.04，那么可以用下面的指令直接安装elite-cs-series-sdk:
+```bash
+sudo add-apt-repository ppa:elite-robots/cs-robot-series-sdk
+sudo apt update
+sudo apt install elite-cs-series-sdk
+```
+
 在Windows平台上，您可以使用以下步骤编译此项目:
 ```bash
 cd <clone of this repository>
@@ -30,6 +37,9 @@ sudo make install
 
 ## User guide
 [中文向导](./doc/UserGuide/cn/UserGuide.cn.md)  
+
+## Architecture
+[代码架构](./doc/Architecture/Arch.cn.md)
 
 ## Document
 编译文档，需要先安装依赖：
