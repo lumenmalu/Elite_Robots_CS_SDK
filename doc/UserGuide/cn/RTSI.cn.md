@@ -6,13 +6,13 @@
 - RtsiIOInterface：对RTSI订阅项进行了封装。
 
 ## Background
-RTSI 是 Elite CS 系列机器人的一种通讯接口，最高可以250HZ的频率读取、写入机器人IO。SDK中提供了两种接口，第一种接口是RTSI的基础接口，可以操控RTSI通讯的每一个步骤。第二种接口将机器人的各种数据，例如关节角等，封装成了函数，可以直接调用。
+RTSI 是 Elite CS 系列机器人的一种通讯接口，最高可以250HZ的频率读取、写入机器人IO。SDK中提供了两种接口，第一种接口是RTSI的基础接口（RtsiClientInterface），可以操控RTSI通讯的每一个步骤。第二种接口将机器人的各种数据（RtsiIOInterface），例如关节角等，封装成了函数，可以直接调用。  
 RTSI 协议的具体说明可到官网下载RTSI说明文档。
 
 ## Prerequisites
 - 确保正确安装了SDK。
 
-## RtsiClientInterface Usage
+## RtsiClientInterface使用
 
 创建一个代码文件：
 ```bash
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Controller version: " << rtsi->getControllerVersion().toString() << std::endl;
 ```
 
-订阅输入、输出配方，并设置输出频率为250HZ
+订阅输入、输出配方，并设置输出频率为250HZ，这里的`out_recipe`、`in_recipe`的类型是`std::shared_ptr<RtsiRecipe>`。
 ```cpp
     auto out_recipe = rtsi->setupOutputRecipe({"timestamp", "actual_joint_positions"}, 250);
     auto in_recipe = rtsi->setupInputRecipe({"speed_slider_mask", "speed_slider_fraction"});
@@ -183,7 +183,10 @@ int main(int argc, char* argv[]) {
     rtsi->send(in_recipe);
 ```
 
-## RtsiIOInterface Usage
+## RtsiRecipe 使用
+通过上文[RtsiClientInterface使用](#RtsiClientInterface使用)中可以看到`RtsiRecipe`的使用，需要注意的是，这个类的实例只能通过`setupOutputRecipe()`和`setupInputRecipe()`获得。
+
+## RtsiIOInterface 使用
 
 创建一个代码文件：
 ```bash
