@@ -184,7 +184,7 @@ Set the input subscription data and send it to the robot.
 ```
 
 ## RtsiRecipe Usage
-From the above [Usage of RtsiClientInterface](#RtsiClientInterface-Usage), we can see the usage of `RtsiRecipe`. It should be noted that instances of this class can only be obtained through `setupOutputRecipe()` and `setupInputRecipe()`.
+From the above Usage of RtsiClientInterface, we can see the usage of `RtsiRecipe`. It should be noted that instances of this class can only be obtained through `setupOutputRecipe()` and `setupInputRecipe()`.
 
 ## RtsiIOInterface Usage
 

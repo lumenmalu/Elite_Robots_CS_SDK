@@ -31,6 +31,7 @@ if (DOXYGEN_FOUND)
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/doc/UserGuide/cn/
         ${CMAKE_SOURCE_DIR}/doc/UserGuide/en/
+        ${CMAKE_SOURCE_DIR}/doc/Architecture/
         COMMENT "Generating documentation with Doxygen"
     )
 

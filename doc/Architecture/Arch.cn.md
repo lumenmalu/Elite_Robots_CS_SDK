@@ -52,7 +52,7 @@ printHello()
 
 > `ScriptSender`是一个类，它在构造时创建了一个TCP服务器，当收到`request\n`时就回复脚本。主要代码：`source/Control/ScriptSender.cpp`
 
-既然`ExternalControl`插件是接收脚本、运行脚本的流程，那么`EliDriver`在初始化时会读取脚本——“external_control.script”，并且按照规则写入参数。在收到请求脚本后，会调用`ScriptSender`来发送脚本给插件。  
+既然`ExternalControl`插件是接收脚本、运行脚本的流程，那么`EliDriver`在初始化时会读取脚本——“external_control.script”，并且按照规则写入参数。在收到请求脚本后，会调用 `ScriptSender` 来发送脚本给插件。  
 
 
 #### 2.2.2 external_control.script

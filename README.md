@@ -39,7 +39,7 @@ sudo make install
 [English guide](./doc/UserGuide/en/UserGuide.en.md)
 
 ## Architecture
-[Code architecture](./doc/Architecture/Arch.cn.md)
+[Code architecture](./doc/Architecture/Arch.en.md)
 
 ## Document
 To compile the documentation, you need to install dependencies first:

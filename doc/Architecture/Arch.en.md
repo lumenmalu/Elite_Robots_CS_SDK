@@ -11,7 +11,7 @@ Here are some explanations about the architecture diagram:
 - RTSI Client: Refers to the RTSI module in the SDK.
 - DashboardClient: Refers to the Dashboard module in the SDK.
 
-Next, the working principle of EliDriver will be explained in detail. The remaining modules directly correspond to the functions of the robot. You can learn about their usage through the [User Guide](../UserGuide/cn/UserGuide.cn.md). The working principles behind them are not difficult to understand, so we won't elaborate on them here.
+Next, the working principle of EliDriver will be explained in detail. The remaining modules directly correspond to the functions of the robot. You can learn about their usage through the [User Guide](../UserGuide/en/UserGuide.en.md). The working principles behind them are not difficult to understand, so we won't elaborate on them here.
 
 ## 2. EliDriver
 
