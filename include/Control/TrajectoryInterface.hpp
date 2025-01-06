@@ -73,7 +73,6 @@ private:
     
     int write(int32_t buffer[], int size);
     void receiveResult();
-    void clientDisconnect();
 };
 
 

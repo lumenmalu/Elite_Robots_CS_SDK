@@ -26,12 +26,6 @@ private:
     std::mutex client_mutex_;
 
     /**
-     * @brief Client disconnect
-     * 
-     */
-    void clientDisconnect();
-
-    /**
      * @brief Not real read data. Check connection state.
      * 
      */

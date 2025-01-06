@@ -55,6 +55,13 @@ public:
         new_connect_function_ = func;
     }
 
+    /**
+     * @brief Close the client socket and reset the pointer.
+     * 
+     * @param client client pointer.
+     */
+    void releaseClient(std::shared_ptr<boost::asio::ip::tcp::socket> client);
+
 };
 
 

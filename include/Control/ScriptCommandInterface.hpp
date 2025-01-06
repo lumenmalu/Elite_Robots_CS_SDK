@@ -26,12 +26,6 @@ private:
     std::mutex client_mutex_;
 
     /**
-     * @brief Close client and reset clinet point
-     * 
-     */
-    void clientDisconnect();
-
-    /**
      * @brief Send socket data to client
      * 
      * @param buffer data buffer
