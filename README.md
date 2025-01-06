@@ -9,7 +9,14 @@ The SDK for Elite CS series robots.
  * This SDK requires a compiler that supports C++17 or C++14. Note that if the C++14 standard is used, **boost::variant** will be used.
  * cmake version >= 3.22.1
 
-## Build
+## Build & Install
+If your system is Ubuntu20.04, Ubuntu22.04 or Ubuntu24.04, you can run the following command to install elite-cs-series-sdk:
+```bash
+sudo add-apt-repository ppa:elite-robots/cs-robot-series-sdk
+sudo apt update
+sudo apt install elite-cs-series-sdk
+```
+
 On the Windows platform, you can use the following steps to compile this project:
 ```bash
 cd <clone of this repository>
@@ -31,6 +38,9 @@ sudo make install
 ## User guide
 [English guide](./doc/UserGuide/en/UserGuide.en.md)
 
+## Architecture
+[Code architecture](./doc/Architecture/Arch.cn.md)
+
 ## Document
 To compile the documentation, you need to install dependencies first:
 ```bash
@@ -43,7 +53,7 @@ You can compile the documentation using the following steps:
 ```bash
 cd <clone of this repository>
 mkdir build && cd build
-cmake -DELITE_COMPLIE_DOC=TRUE..
+cmake -DELITE_COMPLIE_DOC=TRUE ..
 make -j
 ```
 After compilation, in the `./build` directory, you can see the `./docs` directory, which contains the usage documentation.

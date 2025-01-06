@@ -6,7 +6,7 @@
 - RtsiIOInterface: Encapsulates RTSI subscription items.
 
 ## Background
-RTSI is a communication interface for Elite CS series robots. It can read and write robot IOs at a frequency of up to 250Hz. The SDK provides two interfaces. The first interface is the basic interface of RTSI and can control every step of RTSI communication. The second interface encapsulates various robot data, such as joint angles, into functions that can be called directly.
+RTSI is a communication interface for Elite CS series robots. It can read and write robot IOs at a frequency of up to 250Hz. The SDK provides two interfaces. The first interface is the basic interface of RTSI and can control every step of RTSI communication. The second interface encapsulates various robot data, such as joint angles, into functions that can be called directly.  
 For the specific description of the RTSI protocol, you can download the RTSI description document from the official website.
 
 ## Prerequisites
@@ -145,7 +145,7 @@ Use the `getControllerVersion()` method to obtain the controller version and pri
     std::cout << "Controller version: " << rtsi->getControllerVersion().toString() << std::endl;
 ```
 
-Subscribe to input and output recipes and set the output frequency to 250Hz.
+Subscribe to input and output recipes and set the output frequency to 250Hz. The `out_recipe` and `in_recipe` data type is `std::shared_ptr<RtsiRecipe>`.
 ```cpp
     auto out_recipe = rtsi->setupOutputRecipe({"timestamp", "actual_joint_positions"}, 250);
     auto in_recipe = rtsi->setupInputRecipe({"speed_slider_mask", "speed_slider_fraction"});
@@ -182,6 +182,9 @@ Set the input subscription data and send it to the robot.
     in_recipe->setValue("speed_slider_fraction", 0.5);
     rtsi->send(in_recipe);
 ```
+
+## RtsiRecipe Usage
+From the above [Usage of RtsiClientInterface](#RtsiClientInterface-Usage), we can see the usage of `RtsiRecipe`. It should be noted that instances of this class can only be obtained through `setupOutputRecipe()` and `setupInputRecipe()`.
 
 ## RtsiIOInterface Usage
 
