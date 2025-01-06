@@ -3,9 +3,7 @@
 #include <memory>
 #include <thread>
 
-#include "ScriptCommandInterface.hpp"
 #include "ReverseInterface.hpp"
-#include "TrajectoryInterface.hpp"
 #include "ControlCommon.hpp"
 
 #define REVERSE_INTERFACE_TEST_PORT 50002
