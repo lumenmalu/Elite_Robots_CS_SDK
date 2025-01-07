@@ -22,6 +22,21 @@ Message length: 8 int data.
 > *1: Since the script reads integers, while data like joint angles are floating-point numbers, they need to be amplified by 1,000,000 times for transmission. When the script reads these data, it will divide them by 1,000,000.
 > *2: Corresponds to the `ControlMode` enumeration in the code `ControlMode.hpp`.
 
+For the `writeTrajectoryControlAction()` interface, the message format is as follows:
+
+| Name | Description |
+| ---- | ---- |
+| timeout | Timeout (in milliseconds) |
+| Action | Start, cancel or noop |
+| Number of Points | The number of points |
+| Reserved | Reserved |
+| Reserved | Reserved |
+| Reserved | Reserved |
+| Reserved | Reserved |
+| Mode | The value is `ControlMode::MODE_TRAJECTORY` |
+
+
+
 ## 2. ScriptCommandInterface
 
 ### 2.1 Messages Sent to the Control Script

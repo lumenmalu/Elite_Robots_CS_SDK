@@ -55,9 +55,50 @@ public:
     
 };
 
+TEST(TRAJECTORY_INTERFACE, write_point) {
+    std::unique_ptr<TrajectoryInterface> trajectory_ins = std::make_unique<TrajectoryInterface>(TRAJECTORY_INTERFACE_TEST_PORT);
+    std::unique_ptr<TcpClient> client = std::make_unique<TcpClient>();
 
+    EXPECT_NO_THROW(client->connect("127.0.0.1", TRAJECTORY_INTERFACE_TEST_PORT));
 
-TEST(TRAJECTORY_INTERFACE, DISCONNECT) { 
+    std::this_thread::sleep_for(50ms);
+
+    TrajectoryMotionResult motion_result = TrajectoryMotionResult::FAILURE;
+    trajectory_ins->setMotionResultCallback([&](TrajectoryMotionResult result) {
+        motion_result = result;
+    });
+
+    trajectory_ins->writeTrajectoryPoint({1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f}, 100, 1.230, true);
+
+    int32_t buffer[TrajectoryInterface::TRAJECTORY_MESSAGE_LEN];
+    int recv_len = client->socket_ptr->read_some(boost::asio::buffer(buffer, sizeof(buffer)));
+
+    EXPECT_EQ(recv_len, sizeof(buffer));
+
+    EXPECT_EQ(::htonl(buffer[0]), 1 * CONTROL::POS_ZOOM_RATIO);
+    EXPECT_EQ(::htonl(buffer[1]), 2 * CONTROL::POS_ZOOM_RATIO);
+    EXPECT_EQ(::htonl(buffer[2]), 3 * CONTROL::POS_ZOOM_RATIO);
+    EXPECT_EQ(::htonl(buffer[3]), 4 * CONTROL::POS_ZOOM_RATIO);
+    EXPECT_EQ(::htonl(buffer[4]), 5 * CONTROL::POS_ZOOM_RATIO);
+    EXPECT_EQ(::htonl(buffer[5]), 6 * CONTROL::POS_ZOOM_RATIO);
+
+    // time
+    EXPECT_EQ(::htonl(buffer[18]), 100 * CONTROL::TIME_ZOOM_RATIO);
+    // blend
+    EXPECT_EQ(::htonl(buffer[19]), 1.230 * CONTROL::POS_ZOOM_RATIO);
+    // mode
+    EXPECT_EQ(::htonl(buffer[20]), (int)TrajectoryMotionType::CARTESIAN);
+
+    int send_result = (int)TrajectoryMotionResult::SUCCESS;
+    client->socket_ptr->send(boost::asio::buffer(&send_result, sizeof(int)));
+
+    std::this_thread::sleep_for(50ms);
+
+    EXPECT_EQ(motion_result, (TrajectoryMotionResult)send_result);
+
+}
+
+TEST(TRAJECTORY_INTERFACE, disconnect) { 
     std::unique_ptr<TrajectoryInterface> trajectory_ins;
 
     trajectory_ins.reset(new TrajectoryInterface(TRAJECTORY_INTERFACE_TEST_PORT));

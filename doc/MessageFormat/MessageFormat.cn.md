@@ -22,6 +22,18 @@
 > *1：因为脚本在读取的时候，读取的是整数，而关节角等数据都是浮点数，因此需要放大 1000000 倍传输，脚本中读取的时候，会除以 1000000 。
 > *2：对应代码`ControlMode.hpp`中的`ControlMode`枚举。
 
+对于`writeTrajectoryControlAction()`接口报文格式则如下：
+| 名称 | 描述 |
+| --- | --- |
+| timeout | 超时（毫秒） |
+| 动作 | 开始、取消、空操作 |
+| 点位的数量 | 点位的数量 |
+| 保留 | 保留 |
+| 保留 | 保留 |
+| 保留 | 保留 |
+| 保留 | 保留 |
+| 模式 | 值为`ControlMode::MODE_TRAJECTORY` |
+
 ## 2. ScriptCommandInterface
 
 ### 2.1 发送给控制脚本的报文

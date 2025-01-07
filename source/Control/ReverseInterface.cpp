@@ -62,7 +62,7 @@ bool ReverseInterface::writeJointCommand(const vector6d_t& pos, ControlMode mode
 
 bool ReverseInterface::writeJointCommand(const vector6d_t* pos, ControlMode mode, int timeout) {
     std::lock_guard<std::mutex> lock(client_mutex_);
-    if (!client_) {
+    if (!client_ || !pos) {
         return false;
     }
     int32_t data[REVERSE_DATA_SIZE] = {0};

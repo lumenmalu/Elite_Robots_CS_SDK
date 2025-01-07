@@ -53,8 +53,84 @@ public:
     
 };
 
+TEST(REVERSE_INTERFACE, trajectory_control_action) {
+    std::unique_ptr<ReverseInterface> reverse_ins = std::make_unique<ReverseInterface>(REVERSE_INTERFACE_TEST_PORT);
+    std::unique_ptr<TcpClient> client = std::make_unique<TcpClient>();
 
-TEST(REVERSE_INTERFACE, DISCONNECT) { 
+    EXPECT_NO_THROW(client->connect("127.0.0.1", REVERSE_INTERFACE_TEST_PORT));
+
+    std::this_thread::sleep_for(100ms);
+
+    reverse_ins->writeTrajectoryControlAction(TrajectoryControlAction::START, 10, 100);
+
+    int32_t buffer[ReverseInterface::REVERSE_DATA_SIZE];
+    int recv_num = client->socket_ptr->read_some(boost::asio::buffer(buffer, sizeof(buffer)));
+
+    // check size
+    EXPECT_EQ(recv_num, sizeof(buffer));
+    // timeout
+    EXPECT_EQ(::htonl(buffer[0]), 100);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[1]), (int)TrajectoryControlAction::START);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[2]), 10);
+    // control mode
+    EXPECT_EQ(::htonl(buffer[7]), (int)ControlMode::MODE_TRAJECTORY);
+
+    client->socket_ptr->close();
+
+}
+
+TEST(REVERSE_INTERFACE, joint_idle_command) {
+    std::unique_ptr<ReverseInterface> reverse_ins = std::make_unique<ReverseInterface>(REVERSE_INTERFACE_TEST_PORT);
+    std::unique_ptr<TcpClient> client = std::make_unique<TcpClient>();
+
+    EXPECT_NO_THROW(client->connect("127.0.0.1", REVERSE_INTERFACE_TEST_PORT));
+
+    std::this_thread::sleep_for(100ms);
+
+    reverse_ins->writeJointCommand({1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f}, ControlMode::MODE_IDLE, 100);
+
+    int32_t buffer[ReverseInterface::REVERSE_DATA_SIZE];
+    int recv_num = client->socket_ptr->read_some(boost::asio::buffer(buffer, sizeof(buffer)));
+
+    client->socket_ptr->close();
+
+    // check size
+    EXPECT_EQ(recv_num, sizeof(buffer));
+    // timeout
+    EXPECT_EQ(::htonl(buffer[0]), 100);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[1]), 1 * CONTROL::POS_ZOOM_RATIO);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[2]), 2 * CONTROL::POS_ZOOM_RATIO);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[3]), 3 * CONTROL::POS_ZOOM_RATIO);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[4]), 4 * CONTROL::POS_ZOOM_RATIO);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[5]), 5 * CONTROL::POS_ZOOM_RATIO);
+    // data 1
+    EXPECT_EQ(::htonl(buffer[6]), 6 * CONTROL::POS_ZOOM_RATIO);
+    // control mode
+    EXPECT_EQ(::htonl(buffer[7]), (int)ControlMode::MODE_IDLE);
+
+}
+
+TEST(REVERSE_INTERFACE, joint_command_send_nullptr) {
+    std::unique_ptr<ReverseInterface> reverse_ins = std::make_unique<ReverseInterface>(REVERSE_INTERFACE_TEST_PORT);
+    std::unique_ptr<TcpClient> client = std::make_unique<TcpClient>();
+
+    EXPECT_NO_THROW(client->connect("127.0.0.1", REVERSE_INTERFACE_TEST_PORT));
+
+    std::this_thread::sleep_for(100ms);
+
+    EXPECT_FALSE(reverse_ins->writeJointCommand(nullptr, ControlMode::MODE_IDLE, 100));
+
+}
+
+
+TEST(REVERSE_INTERFACE, disconnect) { 
     std::unique_ptr<ReverseInterface> reverse_ins;
 
     reverse_ins.reset(new ReverseInterface(REVERSE_INTERFACE_TEST_PORT));
