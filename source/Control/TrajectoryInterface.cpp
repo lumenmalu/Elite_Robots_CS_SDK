@@ -12,12 +12,13 @@ TrajectoryInterface::TrajectoryInterface(int port) {
     server_.reset(new TcpServer(port));
 
     server_->setConnectCallback([&](std::shared_ptr<boost::asio::ip::tcp::socket> client){
-        ELITE_LOG_INFO("Trajectory interface accept new connection.");
         {
             std::lock_guard<std::mutex> lock(client_mutex_);
-            if (client_) {
-                clientDisconnect();
+            if (client_ && client_->is_open()) {
+                ELITE_LOG_INFO("Trajectory interface has new connection, previous connection will be dropped.");
+                server_->releaseClient(client_);
             }
+            ELITE_LOG_INFO("Trajectory interface accept new connection.");
             client_ = client;
         }
         receiveResult();
@@ -41,8 +42,8 @@ void TrajectoryInterface::receiveResult() {
     }
     client_->async_read_some(boost::asio::buffer(&motion_result_, sizeof(motion_result_)), [&](boost::system::error_code ec, std::size_t len){
         if (len <= 0 || ec) {
-            ELITE_LOG_INFO("Connection to trajectory interface dropped.");
-            client_->close();
+            ELITE_LOG_INFO("Connection to trajectory interface dropped: %s", boost::system::system_error(ec).what());
+            server_->releaseClient(client_);
             return;
         }
         
@@ -78,22 +79,12 @@ bool TrajectoryInterface::writeTrajectoryPoint( const vector6d_t& positions,
     return write(buffer, sizeof(buffer)) > 0;
 }
 
-void TrajectoryInterface::clientDisconnect() {
-    if (client_) {
-        ELITE_LOG_INFO("Connection to trajectory interface dropped.");
-        client_.reset();
-    }
-}
 
 int TrajectoryInterface::write(int32_t buffer[], int size) {
     try {
-        if(client_->write_some(boost::asio::buffer(buffer, size)) < size) {
-            clientDisconnect();
-            return size;
-        }
-        return size;
+        return client_->write_some(boost::asio::buffer(buffer, size));
     } catch(const boost::system::system_error &error) {
-        clientDisconnect();
+        server_->releaseClient(client_);
         return -1;
     }
 }

@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 ```
 
 ## RtsiRecipe 使用
-通过上文[RtsiClientInterface使用](#RtsiClientInterface使用)中可以看到`RtsiRecipe`的使用，需要注意的是，这个类的实例只能通过`setupOutputRecipe()`和`setupInputRecipe()`获得。
+通过上文"RtsiClientInterface使用"中可以看到`RtsiRecipe`的使用，需要注意的是，这个类的实例只能通过`setupOutputRecipe()`和`setupInputRecipe()`获得。
 
 ## RtsiIOInterface 使用
 

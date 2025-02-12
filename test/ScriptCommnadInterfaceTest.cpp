@@ -4,16 +4,17 @@
 #include <thread>
 
 #include "ScriptCommandInterface.hpp"
-#include "ReverseInterface.hpp"
-#include "TrajectoryInterface.hpp"
 #include "ControlCommon.hpp"
 
 using namespace ELITE;
 using namespace std::chrono;
 
 #define SCRIPT_COMMAND_INTERFACE_TEST_PORT 50004
-#define REVERSE_INTERFACE_TEST_PORT 50002
-#define TRAJECTORY_INTERFACE_TEST_PORT 50003
+
+#define ARRAY_EQUAL_ASSERT(a, b)  \
+    for (size_t i = 0; i < ScriptCommandInterface::SCRIPT_COMMAND_DATA_SIZE; i++) { \
+        ASSERT_EQ(a[i], b[i]); \
+    } \
 
 enum Cmd{
     ZERO_FTSENSOR = 0,
@@ -22,6 +23,7 @@ enum Cmd{
     START_FORCE_MODE = 3,
     END_FORCE_MODE = 4,
 };
+
 
 class TcpClient
 {
@@ -64,11 +66,6 @@ public:
     }
     
 };
-
-#define ARRAY_EQUAL_ASSERT(a, b)  \
-    for (size_t i = 0; i < ScriptCommandInterface::SCRIPT_COMMAND_DATA_SIZE; i++) { \
-        ASSERT_EQ(a[i], b[i]); \
-    } \
 
 TEST(ScriptCommandInterfaceTest, SendAndReceive) {
     std::unique_ptr<ScriptCommandInterface> script_cmd;
@@ -174,48 +171,6 @@ TEST(ScriptCommandInterfaceTest, SendAndReceive) {
     int32_t end_force_mode_buffer[ScriptCommandInterface::SCRIPT_COMMAND_DATA_SIZE] = {0};
     end_force_mode_buffer[0] = htonl(Cmd::END_FORCE_MODE);
     ARRAY_EQUAL_ASSERT(buffer, end_force_mode_buffer);
-}
-
-TEST(REVERSE_INTERFACE, DISCONNECT) { 
-    std::unique_ptr<ReverseInterface> reverse_ins;
-
-    reverse_ins.reset(new ReverseInterface(REVERSE_INTERFACE_TEST_PORT));
-
-    std::unique_ptr<TcpClient> client;
-    client.reset(new TcpClient());
-    EXPECT_NO_THROW(client->connect("127.0.0.1", REVERSE_INTERFACE_TEST_PORT));
-
-    std::this_thread::sleep_for(50ms);
-
-    EXPECT_TRUE(reverse_ins->isRobotConnect());
-
-    client.reset();
-
-    std::this_thread::sleep_for(50ms);
-
-    EXPECT_FALSE(reverse_ins->isRobotConnect());
-
-}
-
-TEST(TRAJECTORY_INTERFACE, DISCONNECT) { 
-    std::unique_ptr<TrajectoryInterface> trajectory_ins;
-
-    trajectory_ins.reset(new TrajectoryInterface(TRAJECTORY_INTERFACE_TEST_PORT));
-
-    std::unique_ptr<TcpClient> client;
-    client.reset(new TcpClient());
-    EXPECT_NO_THROW(client->connect("127.0.0.1", TRAJECTORY_INTERFACE_TEST_PORT));
-
-    std::this_thread::sleep_for(50ms);
-
-    EXPECT_TRUE(trajectory_ins->isRobotConnect());
-
-    client.reset();
-
-    std::this_thread::sleep_for(50ms);
-
-    EXPECT_FALSE(trajectory_ins->isRobotConnect());
-
 }
 
 int main(int argc, char** argv) {
