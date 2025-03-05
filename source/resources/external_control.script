@@ -86,7 +86,7 @@ def targetWithinLimits(step_start, step_end, time):
                 textmsg("end   configuration: ", step_end)
             violation_popup_counter += 1
             return False
-    if violation_popup_counter > 0
+    if violation_popup_counter > 0:
         textmsg("Received valid position. Resuming execution.")
         violation_popup_counter = 0
     return True
