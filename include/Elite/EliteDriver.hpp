@@ -49,11 +49,12 @@ public:
      * @param servoj_time The duration of servoj motion.
      * @param servoj_lookhead_time Time [S], range [0.03,0.2] smoothens the trajectory with this lookahead time
      * @param servoj_gain Not use in current EliRobot&EliServer version(2.11.0).
+     * @param stopj_acc acceleration [rad/s^2]. The acceleration of stopj motion.
      */
     ELITE_EXPORT EliteDriver(const std::string& robot_ip, const std::string& local_ip, const std::string& script_file,
                 bool headless_mode = false, int script_sender_port = 50002, int reverse_port = 50001,
                 int trajectory_port = 50003, int script_command_port = 50004, float servoj_time = 0.008,
-                float servoj_lookhead_time = 0.08, int servoj_gain = 300);
+                float servoj_lookhead_time = 0.08, int servoj_gain = 300, float stopj_acc = 4.0);
 
     /**
      * @brief Destroy the Elite Driver object
