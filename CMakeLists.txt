@@ -134,14 +134,16 @@ file(COPY ${PROJECT_SOURCE_DIR}/include/Elite/Log.hpp DESTINATION ${PROJECT_BINA
 add_library(${PROJECT_NAME}::shared ALIAS ${PROJECT_NAME}_SHARED)
 target_include_directories(
     ${PROJECT_NAME}_SHARED
-    INTERFACE
-    "${PROJECT_BINARY_DIR}/include"
+    PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
 )
 add_library(${PROJECT_NAME}::static ALIAS ${PROJECT_NAME}_STATIC)
 target_include_directories(
     ${PROJECT_NAME}_STATIC
-    INTERFACE
-    "${PROJECT_BINARY_DIR}/include"
+    PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
 )
 
 # Is compile examples
