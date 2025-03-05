@@ -27,7 +27,7 @@ MODE_POSE = 5
 MODE_FREEDRIVE = 6
 MODE_TOOL_IN_CONTACT = 7
 
-STOPJ_ACCELERATION = 4.0
+STOPJ_ACCELERATION = {{STOP_J_REPLACE}}
 
 SERVO_UNINITIALIZED = -1
 SERVO_IDLE = 0
@@ -45,7 +45,7 @@ TRAJECTORY_DATA_SIZE = {{TRAJECTORY_DATA_SIZE_REPLACE}}
 SCRIPT_COMMAND_DATA_SIZE = {{SCRIPT_COMMAND_DATA_SIZE_REPLACE}}
 
 # Any motion commands resulting in a velocity higher than that will be ignored.
-JOINT_IGNORE_SPEED = 20.0
+JOINT_IGNORE_SPEED = 15.0
 
 #Global variables are also showed in the Teach pendants variable list
 global control_mode
