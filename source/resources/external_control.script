@@ -128,8 +128,8 @@ def setServoSetpoint(joints):
     # triggers a path deviation on the commanding side and that is mitigated by a hold-position
     # command.
     elif targetWithinLimits(get_actual_joint_positions(), joints, steptime):
-        cmd_servo_q_last = cmd_servo_q
-        cmd_servo_q = q
+        cmd_servo_joints_last = cmd_servo_joints
+        cmd_servo_joints = joints
 
 def extrapolate():
     global cmd_servo_joints_last, cmd_servo_joints
