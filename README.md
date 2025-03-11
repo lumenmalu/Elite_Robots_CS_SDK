@@ -53,7 +53,7 @@ You can compile the documentation using the following steps:
 ```bash
 cd <clone of this repository>
 mkdir build && cd build
-cmake -DELITE_COMPLIE_DOC=TRUE ..
+cmake -DELITE_COMPILE_DOC=TRUE ..
 make -j
 ```
 After compilation, in the `./build` directory, you can see the `./docs` directory, which contains the usage documentation.
@@ -63,7 +63,7 @@ In the folder `./example/`, there are examples of how to use this SDK. If you ne
 ```bash
 cd <clone of this repository>
 mkdir build && cd build
-cmake -DELITE_COMPLIE_EXAMPLES=TRUE..
+cmake -DELITE_COMPILE_EXAMPLES=TRUE..
 make -j
 sudo make install
 ```

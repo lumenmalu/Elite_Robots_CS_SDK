@@ -53,7 +53,7 @@ sudo apt-get install doxygen-gui
 ```bash
 cd <clone of this repository>
 mkdir build && cd build
-cmake -DELITE_COMPLIE_DOC=TRUE ..
+cmake -DELITE_COMPILE_DOC=TRUE ..
 make -j
 ```
 编译完成后，在`./build`目录下能看到`./docs`目录，里面就包含了使用文档。
@@ -63,7 +63,7 @@ make -j
 ```bash
 cd <clone of this repository>
 mkdir build && cd build
-cmake -DELITE_COMPLIE_EXAMPLES=TRUE .. 
+cmake -DELITE_COMPILE_EXAMPLES=TRUE .. 
 make -j
 sudo make install
 ```
