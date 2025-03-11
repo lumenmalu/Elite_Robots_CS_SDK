@@ -1,3 +1,7 @@
+#ifndef __ELITE__REMOTE_UPGRADE_HPP__
+#define __ELITE__REMOTE_UPGRADE_HPP__
+
+
 #include <string>
 
 namespace ELITE
@@ -21,3 +25,5 @@ bool upgradeControlSoftware(std::string ip, std::string file, std::string passwo
 
 }
 }
+
+#endif
