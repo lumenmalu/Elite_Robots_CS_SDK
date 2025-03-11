@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(elite-cs-series-sdk VERSION 1.1.0)
 
-option(ELITE_COMPLIE_TESTS "Compile tests" ON)
-option(ELITE_COMPLIE_DOC "Compile documentation" OFF)
-option(ELITE_COMPLIE_EXAMPLES "Compile examples" OFF)
+option(ELITE_COMPILE_TESTS "Compile tests" OFF)
+option(ELITE_COMPILE_DOC "Compile documentation" OFF)
+option(ELITE_COMPILE_EXAMPLES "Compile examples" OFF)
 
 include(cmake/utils.cmake)
 
@@ -54,6 +54,7 @@ set(
     source/Elite/EliteDriver.cpp
     source/Elite/Log.cpp
     source/Elite/Logger.cpp
+    source/Elite/RemoteUpgrade.cpp
 )
 
 set(
@@ -116,19 +117,29 @@ target_include_directories(
     ${ELITE_LIB_INCLUDE_DIR}
 )
 
+# Head file list
+set(
+    ELITE_HEADER_FILES
+    Elite/DataType.hpp
+    Elite/VersionInfo.hpp
+    Dashboard/DashboardClient.hpp
+    Rtsi/RtsiClientInterface.hpp
+    Rtsi/RtsiIOInterface.hpp
+    Rtsi/RtsiRecipe.hpp
+    Primary/PrimaryPackage.hpp
+    Primary/RobotConfPackage.hpp
+    Primary/PrimaryPortInterface.hpp
+    EliteException.hpp
+    Elite/EliteDriver.hpp
+    Elite/Log.hpp
+    Elite/RemoteUpgrade.hpp
+)
+
 # Copy head file
-file(COPY ${PROJECT_SOURCE_DIR}/include/Elite/DataType.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Elite/VersionInfo.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Dashboard/DashboardClient.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Rtsi/RtsiClientInterface.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Rtsi/RtsiIOInterface.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Rtsi/RtsiRecipe.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Primary/PrimaryPackage.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Primary/RobotConfPackage.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Primary/PrimaryPortInterface.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/EliteException.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Elite/EliteDriver.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
-file(COPY ${PROJECT_SOURCE_DIR}/include/Elite/Log.hpp DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
+foreach(header ${ELITE_HEADER_FILES})
+    file(COPY ${PROJECT_SOURCE_DIR}/include/${header} 
+         DESTINATION ${PROJECT_BINARY_DIR}/include/Elite)
+endforeach()
 
 # Prepare exporting targets
 add_library(${PROJECT_NAME}::shared ALIAS ${PROJECT_NAME}_SHARED)
@@ -147,19 +158,19 @@ target_include_directories(
 )
 
 # Is compile examples
-if(ELITE_COMPLIE_EXAMPLES)
+if(ELITE_COMPILE_EXAMPLES)
     message(STATUS "Compile the exmaples")
     add_subdirectory(example ${CMAKE_BINARY_DIR}/example/)
 endif()
 
 # If compile documentation
-if(ELITE_COMPLIE_DOC)
+if(ELITE_COMPILE_DOC)
     message(STATUS "Compile the documentation.")
     add_subdirectory(doc ${CMAKE_BINARY_DIR}/doc/)
 endif()
 
 # If googel test has been foune, compile unit test
-if (GTEST_FOUND AND ELITE_COMPLIE_TESTS)
+if (GTEST_FOUND AND ELITE_COMPILE_TESTS)
     message(STATUS "Compile the tests")
     add_subdirectory(test ${CMAKE_BINARY_DIR}/test/)
 endif()
