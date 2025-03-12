@@ -15,10 +15,12 @@ namespace UPGRADE
  * 
  * @param ip Robot ip
  * @param file Upgrade file
- * @param password robot controller ssh password
+ * @param password Robot controller ssh password
  * @return true success
  * @return false fail
- * @note Windows not support yet
+ * @note 
+ *      1. Windows not support yet.
+ *      2. Ensure that the ssh and scp commands are installed in your system.
  */
 bool upgradeControlSoftware(std::string ip, std::string file, std::string password);
 

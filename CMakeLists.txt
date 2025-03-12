@@ -22,6 +22,7 @@ else()
     message(FATAL_ERROR  "C++ standard must C++14 or higher")
 endif()
 
+# Find third-party library
 find_package(GTest)
 find_package(Boost)
 if(NOT BOOST_FOUND)
@@ -33,11 +34,13 @@ configure_file(
     ${PROJECT_BINARY_DIR}/include/Elite/EliteOptions.hpp
 )
 
+# Source file list
 set(
     ELITE_LIB_SOURCE_FILE
     source/Common/Utils.cpp
     source/Common/TcpServer.cpp
     source/Common/EliteException.cpp
+    source/Common/SshUtils.cpp
     source/Primary/PrimaryPort.cpp
     source/Primary/PrimaryPortInterface.cpp
     source/Primary/RobotConfPackage.cpp
@@ -55,6 +58,7 @@ set(
     source/Elite/Log.cpp
     source/Elite/Logger.cpp
     source/Elite/RemoteUpgrade.cpp
+    source/Elite/ControllerLog.cpp
 )
 
 set(
@@ -68,6 +72,25 @@ set(
     ${PROJECT_SOURCE_DIR}/include/Control
     ${PROJECT_SOURCE_DIR}/include/
     ${PROJECT_BINARY_DIR}/include/
+)
+
+# Head file list
+set(
+    ELITE_HEADER_FILES
+    Elite/DataType.hpp
+    Elite/VersionInfo.hpp
+    Dashboard/DashboardClient.hpp
+    Rtsi/RtsiClientInterface.hpp
+    Rtsi/RtsiIOInterface.hpp
+    Rtsi/RtsiRecipe.hpp
+    Primary/PrimaryPackage.hpp
+    Primary/RobotConfPackage.hpp
+    Primary/PrimaryPortInterface.hpp
+    EliteException.hpp
+    Elite/EliteDriver.hpp
+    Elite/Log.hpp
+    Elite/RemoteUpgrade.hpp
+    Elite/ControllerLog.hpp
 )
 
 # Set output library default name
@@ -86,6 +109,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "SYSTEM: Linux")
     set(SYSTEM_LIB pthread)
+    set(THIRDPARTY_LIB ssh)
 else()
     message(FATAL_ERROR "Unsupport operating system")
 endif()
@@ -116,23 +140,15 @@ target_include_directories(
     PRIVATE
     ${ELITE_LIB_INCLUDE_DIR}
 )
-
-# Head file list
-set(
-    ELITE_HEADER_FILES
-    Elite/DataType.hpp
-    Elite/VersionInfo.hpp
-    Dashboard/DashboardClient.hpp
-    Rtsi/RtsiClientInterface.hpp
-    Rtsi/RtsiIOInterface.hpp
-    Rtsi/RtsiRecipe.hpp
-    Primary/PrimaryPackage.hpp
-    Primary/RobotConfPackage.hpp
-    Primary/PrimaryPortInterface.hpp
-    EliteException.hpp
-    Elite/EliteDriver.hpp
-    Elite/Log.hpp
-    Elite/RemoteUpgrade.hpp
+target_link_libraries(
+    ${PROJECT_NAME}_SHARED
+    PRIVATE
+    ${THIRDPARTY_LIB}
+)
+target_link_libraries(
+    ${PROJECT_NAME}_STATIC
+    PRIVATE
+    ${THIRDPARTY_LIB}
 )
 
 # Copy head file
