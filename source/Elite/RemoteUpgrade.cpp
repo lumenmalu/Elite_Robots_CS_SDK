@@ -16,9 +16,9 @@ namespace ELITE
 namespace UPGRADE
 {
 
+#if defined(__linux) || defined(linux) || defined(__linux__)
 bool upgradeControlSoftware(std::string ip, std::string file, std::string password) {
     ELITE_LOG_INFO("Upgrade control software begin");
-#if defined(__linux) || defined(linux) || defined(__linux__)
     int master_fd;
     pid_t pid = forkpty(&master_fd, nullptr, nullptr, nullptr);
     if (pid < 0) {
@@ -70,12 +70,10 @@ bool upgradeControlSoftware(std::string ip, std::string file, std::string passwo
     close(master_fd);
     // wait child finish
     wait(NULL);
-#else
-    return false;
-#endif
     return true;
 }
 
+#endif
 
 } // namespace UPGRADE
 

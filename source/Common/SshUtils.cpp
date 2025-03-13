@@ -11,6 +11,8 @@ namespace ELITE {
 
 namespace SSH_UTILS {
 
+#if defined(__linux) || defined(linux) || defined(__linux__)
+
 std::string executeCommand(const std::string &host, const std::string &user,
                            const std::string &password,
                            const std::string &cmd) {
@@ -168,6 +170,8 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_free(session);
     return true;
 }
+
+#endif
 
 } // namespace SSH_UTILS
 

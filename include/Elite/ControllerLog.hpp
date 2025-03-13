@@ -5,7 +5,7 @@
 #include <functional>
 
 namespace ELITE {
-
+#if defined(__linux) || defined(linux) || defined(__linux__)
 class ControllerLog {
 private:
 public:
@@ -31,6 +31,8 @@ public:
     ControllerLog() {}
     ~ControllerLog() {}
 };
+
+#endif
 
 } // namespace ELITE
 

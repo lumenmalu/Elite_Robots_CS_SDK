@@ -9,7 +9,7 @@ namespace ELITE
 
 namespace UPGRADE
 {
-
+#if defined(__linux) || defined(linux) || defined(__linux__)
 /**
  * @brief Upgrade the robot control software
  * 
@@ -23,7 +23,7 @@ namespace UPGRADE
  *      2. Ensure that the ssh and scp commands are installed in your system.
  */
 bool upgradeControlSoftware(std::string ip, std::string file, std::string password);
-
+#endif
 
 }
 }
