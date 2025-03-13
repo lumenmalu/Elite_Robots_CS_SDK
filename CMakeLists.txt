@@ -22,10 +22,15 @@ else()
     message(FATAL_ERROR  "C++ standard must C++14 or higher")
 endif()
 
+# Find third-party library
 find_package(GTest)
 find_package(Boost)
 if(NOT BOOST_FOUND)
     message(AUTHOR_WARNING "Not found boost library. Subsequent compilations may fail.")
+endif()
+# TODO:Windows support
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(libssh REQUIRED)
 endif()
 
 configure_file(
@@ -33,11 +38,13 @@ configure_file(
     ${PROJECT_BINARY_DIR}/include/Elite/EliteOptions.hpp
 )
 
+# Source file list
 set(
     ELITE_LIB_SOURCE_FILE
     source/Common/Utils.cpp
     source/Common/TcpServer.cpp
     source/Common/EliteException.cpp
+    source/Common/SshUtils.cpp
     source/Primary/PrimaryPort.cpp
     source/Primary/PrimaryPortInterface.cpp
     source/Primary/RobotConfPackage.cpp
@@ -55,6 +62,7 @@ set(
     source/Elite/Log.cpp
     source/Elite/Logger.cpp
     source/Elite/RemoteUpgrade.cpp
+    source/Elite/ControllerLog.cpp
 )
 
 set(
@@ -68,6 +76,25 @@ set(
     ${PROJECT_SOURCE_DIR}/include/Control
     ${PROJECT_SOURCE_DIR}/include/
     ${PROJECT_BINARY_DIR}/include/
+)
+
+# Head file list
+set(
+    ELITE_HEADER_FILES
+    Elite/DataType.hpp
+    Elite/VersionInfo.hpp
+    Dashboard/DashboardClient.hpp
+    Rtsi/RtsiClientInterface.hpp
+    Rtsi/RtsiIOInterface.hpp
+    Rtsi/RtsiRecipe.hpp
+    Primary/PrimaryPackage.hpp
+    Primary/RobotConfPackage.hpp
+    Primary/PrimaryPortInterface.hpp
+    EliteException.hpp
+    Elite/EliteDriver.hpp
+    Elite/Log.hpp
+    Elite/RemoteUpgrade.hpp
+    Elite/ControllerLog.hpp
 )
 
 # Set output library default name
@@ -86,6 +113,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "SYSTEM: Linux")
     set(SYSTEM_LIB pthread)
+    if(libssh_FOUND)
+        set(THIRDPARTY_LIB ${THIRDPARTY_LIB} ssh)
+    endif()
 else()
     message(FATAL_ERROR "Unsupport operating system")
 endif()
@@ -116,23 +146,15 @@ target_include_directories(
     PRIVATE
     ${ELITE_LIB_INCLUDE_DIR}
 )
-
-# Head file list
-set(
-    ELITE_HEADER_FILES
-    Elite/DataType.hpp
-    Elite/VersionInfo.hpp
-    Dashboard/DashboardClient.hpp
-    Rtsi/RtsiClientInterface.hpp
-    Rtsi/RtsiIOInterface.hpp
-    Rtsi/RtsiRecipe.hpp
-    Primary/PrimaryPackage.hpp
-    Primary/RobotConfPackage.hpp
-    Primary/PrimaryPortInterface.hpp
-    EliteException.hpp
-    Elite/EliteDriver.hpp
-    Elite/Log.hpp
-    Elite/RemoteUpgrade.hpp
+target_link_libraries(
+    ${PROJECT_NAME}_SHARED
+    PRIVATE
+    ${THIRDPARTY_LIB}
+)
+target_link_libraries(
+    ${PROJECT_NAME}_STATIC
+    PRIVATE
+    ${THIRDPARTY_LIB}
 )
 
 # Copy head file
@@ -228,3 +250,4 @@ message(STATUS "CMAKE_C_FLAGS:                      ${CMAKE_C_FLAGS}")
 message(STATUS "CMAKE_CXX_FLAGS:                    ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR:           ${CMAKE_INSTALL_INCLUDEDIR}")
 message(STATUS "CMAKE_INSTALL_LIBDIR:               ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "THIRDPARTY_LIB                      ${THIRDPARTY_LIB}")
