@@ -584,22 +584,13 @@ void RtsiIOInterface::setupRecipe() {
 void RtsiIOInterface::recvLoop() {
     // Calculate the ideal cycle time.
     double period_ms = (1 / target_frequency_) * 1000;
-    if (period_ms < 4) {
-        period_ms = 4;
-    } else if (period_ms > 1000) {
-        period_ms = 1000;
-    }
     ELITE_LOG_INFO("RTSI IO interface sync thread start, period %lfms", period_ms);
     while (is_recv_thread_alive_) {
         try {
-            if (isReadAvailable()) {
-                if (input_new_cmd_) {
-                    send(input_recipe_);
-                    input_new_cmd_ = false;
-                }
-                receiveData(output_recipe_, true);
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds((int)period_ms));
+            receiveData(output_recipe_, false);
+            if (input_new_cmd_) {
+                send(input_recipe_);
+                input_new_cmd_ = false;
             }
         } catch(const std::exception& e) {
             is_recv_thread_alive_ = false;
