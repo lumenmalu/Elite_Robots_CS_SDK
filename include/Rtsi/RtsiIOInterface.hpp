@@ -430,7 +430,7 @@ public:
     ELITE_EXPORT double getOutDoubleRegister(int index);
 
 private:
-    bool input_new_cmd_;
+    volatile bool input_new_cmd_;
     std::vector<std::string> input_recipe_string_;
     std::vector<std::string> output_recipe_string_;
     double target_frequency_;
