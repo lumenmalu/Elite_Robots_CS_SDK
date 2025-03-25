@@ -2,8 +2,17 @@
 #include <fstream>
 #include <vector>
 #include <stdexcept>
-#ifdef ELITE_USE_LIB_SSH
-    #include <libssh/libssh.h>    
+#include <sstream>
+#if defined(__linux) || defined(linux) || defined(__linux__)
+    #ifdef ELITE_USE_LIB_SSH
+        #include <libssh/libssh.h>
+    #else
+        #include <sys/types.h>
+        #include <sys/wait.h>
+        #include <unistd.h>
+    #endif
+#include <errno.h>
+#include <string.h>
 #endif
 
 #include "Common/SshUtils.hpp"
@@ -82,20 +91,54 @@ std::string executeCommand(const std::string &host, const std::string &user,
     
     return result;
 #else
-    std::string ssh_command = 
-        "sshpass -p "+ password + " ssh -o StrictHostKeyChecking=no " + user + "@" + host + " " + cmd;
-    std::string result;
-    char buffer[4096];
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) {
-        ELITE_LOG_ERROR("Run command %s fail", ssh_command.c_str());
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+        char buf[256] = {0};
+        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
         return "";
     }
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        result += buffer;
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        char buf[256] = {0};
+        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
+        return "";
     }
-    pclose(pipe);
-    return result;
+
+    if (pid == 0) { // child process
+        // Close reader
+        close(pipefd[0]); 
+        // Redirect stdout to a pipe.
+        dup2(pipefd[1], STDOUT_FILENO);
+        // Close the writter (which has been duplicated to stdout).
+        close(pipefd[1]); 
+        execlp("sshpass", "sshpass", "-p", password.c_str(), 
+               "ssh", "-o", "StrictHostKeyChecking=no", 
+               (user + "@" + host).c_str(), cmd.c_str(), nullptr);
+        char err_buf[256] = {0};
+        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, err_buf, sizeof(err_buf)));
+        exit(1);
+    } else {
+        // Close the writter
+        close(pipefd[1]);
+        char buffer[256];
+        std::ostringstream result;
+
+        // Read child porcess output
+        ssize_t bytesRead;
+        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+            buffer[bytesRead] = '\0';
+            result << buffer;
+        }
+        // Close reader
+        close(pipefd[0]);
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            ELITE_LOG_INFO("Execute command \"%s\" exited with status: %d", cmd.c_str(), WEXITSTATUS(status));
+        }
+        return result.str();
+    }
 #endif
 }
 
@@ -190,8 +233,34 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_free(session);
     return true;
 #else
-    return true;
+    (void)progress_cb;
+    pid_t pid = fork();
+    if (pid == -1) {
+        char err_buf[256] = {0};
+        ELITE_LOG_ERROR("scp file \"%s\" fail: %d", remote_path.c_str(), strerror_r(errno, err_buf, sizeof(err_buf)));
+        return false;
+    }
 
+    if (pid == 0) {
+        execlp("sshpass", "sshpass", "-p", password.c_str(), 
+               "scp", "-o", "StrictHostKeyChecking=no", 
+               (user + "@" + server + ":" + remote_path).c_str(), 
+               local_path.c_str(), 
+               nullptr);
+        perror("execlp failed");
+        exit(1);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            ELITE_LOG_INFO("scp file \"%s\" exited with status: %d", remote_path.c_str(), WEXITSTATUS(status));
+            if (status) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
 #endif
 }
 

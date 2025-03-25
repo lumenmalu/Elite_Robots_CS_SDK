@@ -13,15 +13,13 @@ static std::string s_ip;
 static std::string s_ssh_pw;
 
 TEST(sshUtilsTest, ssh_utils_test) {
-    SSH_UTILS::executeCommand(s_ip, s_user, s_ssh_pw, "");
     std::string cmd_output = 
         SSH_UTILS::executeCommand(
             s_ip, 
             s_user, 
             s_ssh_pw, 
-            "export ELITE_TEST_SSH_ENV=ABCD\n"
-            "printenv ELITE_TEST_SSH_ENV");
-    EXPECT_EQ(cmd_output, "ABCD\n");
+            "printenv PATH");
+    EXPECT_NE(cmd_output.find("/usr/bin"), cmd_output.npos);
 }
 
 

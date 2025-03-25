@@ -18,7 +18,7 @@ bool ControllerLog::downloadSystemLog(const std::string &robot_ip,
     // Erase '\n'
     remote_path.erase(std::remove(remote_path.begin(), remote_path.end(), '\n'), remote_path.end());
     remote_path += "log/log_history.csv";
-    ELITE_LOG_DEBUG(remote_path.c_str());
+    ELITE_LOG_DEBUG("Remote path: %s", remote_path.c_str());
     return SSH_UTILS::downloadFile(robot_ip, "root", password, remote_path, path, progress_cb);
 }
 #endif
