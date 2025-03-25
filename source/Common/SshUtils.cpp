@@ -1,8 +1,10 @@
-#include <libssh/libssh.h>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#ifdef ELITE_USE_LIB_SSH
+    #include <libssh/libssh.h>    
+#endif
 
 #include "Common/SshUtils.hpp"
 #include "Elite/Log.hpp"
@@ -16,6 +18,7 @@ namespace SSH_UTILS {
 std::string executeCommand(const std::string &host, const std::string &user,
                            const std::string &password,
                            const std::string &cmd) {
+#ifdef ELITE_USE_LIB_SSH
     ssh_session session = ssh_new();
     if (!session) {
         ELITE_LOG_ERROR("Failed to create SSH session");
@@ -78,6 +81,22 @@ std::string executeCommand(const std::string &host, const std::string &user,
     ssh_free(session);
     
     return result;
+#else
+    std::string ssh_command = 
+        "sshpass -p "+ password + " ssh -o StrictHostKeyChecking=no " + user + "@" + host + " " + cmd;
+    std::string result;
+    char buffer[4096];
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        ELITE_LOG_ERROR("Run command %s fail", ssh_command.c_str());
+        return "";
+    }
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result += buffer;
+    }
+    pclose(pipe);
+    return result;
+#endif
 }
 
 
@@ -86,6 +105,7 @@ bool downloadFile(const std::string& server, const std::string& user,
                   const std::string& password, const std::string& remote_path, 
                   const std::string& local_path, 
                   std::function<void (int f_z, int r_z, const char* err)> progress_cb) {
+#ifdef ELITE_USE_LIB_SSH
     // Read 64 KB each time.
     constexpr int CHUNK_SIZE = 65536;
     ssh_session session = ssh_new();
@@ -169,6 +189,10 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_disconnect(session);
     ssh_free(session);
     return true;
+#else
+    return true;
+
+#endif
 }
 
 #endif
