@@ -4,10 +4,8 @@
 
 #include <cstdlib>
 #include <algorithm>
-#include <libssh/libssh.h>
 
 namespace ELITE {
-#if defined(__linux) || defined(linux) || defined(__linux__)
 bool ControllerLog::downloadSystemLog(const std::string &robot_ip,
                                       const std::string &password,
                                       const std::string &path, 
@@ -21,6 +19,5 @@ bool ControllerLog::downloadSystemLog(const std::string &robot_ip,
     ELITE_LOG_DEBUG("Remote path: %s", remote_path.c_str());
     return SSH_UTILS::downloadFile(robot_ip, "root", password, remote_path, path, progress_cb);
 }
-#endif
 
 } // namespace ELITE

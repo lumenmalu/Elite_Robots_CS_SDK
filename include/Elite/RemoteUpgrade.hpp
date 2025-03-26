@@ -3,13 +3,13 @@
 
 
 #include <string>
+#include <Elite/EliteOptions.hpp>
 
 namespace ELITE
 {
 
 namespace UPGRADE
 {
-#if defined(__linux) || defined(linux) || defined(__linux__)
 /**
  * @brief Upgrade the robot control software
  * 
@@ -22,8 +22,7 @@ namespace UPGRADE
  *      1. Windows not support yet.
  *      2. Ensure that the ssh and scp commands are installed in your system.
  */
-bool upgradeControlSoftware(std::string ip, std::string file, std::string password);
-#endif
+ELITE_EXPORT bool upgradeControlSoftware(std::string ip, std::string file, std::string password);
 
 }
 }

@@ -1,18 +1,21 @@
+#define NOMINMAX
 #include <string>
 #include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <sstream>
-#if defined(__linux) || defined(linux) || defined(__linux__)
-    #ifdef ELITE_USE_LIB_SSH
-        #include <libssh/libssh.h>
-    #else
+
+#include <algorithm>
+#ifdef ELITE_USE_LIB_SSH
+    #include <libssh/libssh.h>
+#else
+    #if defined(__linux) || defined(linux) || defined(__linux__)
         #include <sys/types.h>
         #include <sys/wait.h>
         #include <unistd.h>
+        #include <errno.h>
+        #include <string.h>
     #endif
-#include <errno.h>
-#include <string.h>
 #endif
 
 #include "Common/SshUtils.hpp"
@@ -21,8 +24,6 @@
 namespace ELITE {
 
 namespace SSH_UTILS {
-
-#if defined(__linux) || defined(linux) || defined(__linux__)
 
 std::string executeCommand(const std::string &host, const std::string &user,
                            const std::string &password,
@@ -91,6 +92,7 @@ std::string executeCommand(const std::string &host, const std::string &user,
     
     return result;
 #else
+#if defined(__linux) || defined(linux) || defined(__linux__)
     int pipefd[2];
     if (pipe(pipefd) == -1) {
         char buf[256] = {0};
@@ -139,6 +141,9 @@ std::string executeCommand(const std::string &host, const std::string &user,
         }
         return result.str();
     }
+#else
+    return "";
+#endif
 #endif
 }
 
@@ -233,6 +238,7 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_free(session);
     return true;
 #else
+#if defined(__linux) || defined(linux) || defined(__linux__)
     (void)progress_cb;
     pid_t pid = fork();
     if (pid == -1) {
@@ -261,10 +267,11 @@ bool downloadFile(const std::string& server, const std::string& user,
             }
         }
     }
+#else
+    return false;
+#endif
 #endif
 }
-
-#endif
 
 } // namespace SSH_UTILS
 

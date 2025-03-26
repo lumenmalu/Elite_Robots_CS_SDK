@@ -3,9 +3,9 @@
 
 #include <string>
 #include <functional>
+#include <Elite/EliteOptions.hpp>
 
 namespace ELITE {
-#if defined(__linux) || defined(linux) || defined(__linux__)
 class ControllerLog {
 private:
 public:
@@ -24,7 +24,7 @@ public:
      * @note **Ensure that the sshpass and scp commands are installed in your
      * system.**
      */
-    static bool downloadSystemLog(
+    ELITE_EXPORT static bool downloadSystemLog(
         const std::string &robot_ip, const std::string &password,
         const std::string &path,
         std::function<void(int f_z, int r_z, const char *err)> progress_cb);
@@ -32,7 +32,6 @@ public:
     ~ControllerLog() {}
 };
 
-#endif
 
 } // namespace ELITE
 

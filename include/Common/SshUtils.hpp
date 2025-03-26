@@ -7,7 +7,6 @@
 namespace ELITE {
 
 namespace SSH_UTILS {
-#if defined(__linux) || defined(linux) || defined(__linux__)
 /**
  * @brief Log in to the server via SSH, execute commands, and return the output
  * of the commands.
@@ -42,7 +41,6 @@ bool downloadFile(
     const std::string &local_path,
     std::function<void(int f_z, int r_z, const char *err)> progress_cb);
 
-#endif
 
 } // namespace SSH_UTILS
 
