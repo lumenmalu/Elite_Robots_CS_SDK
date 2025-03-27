@@ -1,14 +1,14 @@
 #ifndef ___ELITE_CONTROLLER_LOG_HPP__
 #define ___ELITE_CONTROLLER_LOG_HPP__
 
-#include <string>
-#include <functional>
 #include <Elite/EliteOptions.hpp>
+#include <functional>
+#include <string>
 
 namespace ELITE {
 class ControllerLog {
-private:
-public:
+   private:
+   public:
     /**
      * @brief Download system log from robot
      *
@@ -21,18 +21,16 @@ public:
      *      err: Error information (nullptr when there is no error)
      * @return true success
      * @return false fail
-     * @note **Ensure that the sshpass and scp commands are installed in your
-     * system.**
+     *      1. On Linux, if `libssh` is not installed, you need to ensure that the computer running the SDK has the `scp`, `ssh`,
+     * and `sshpass` commands available.
+     *      2. In Windows, if libssh is not installed, then this interface will not be available.
      */
-    ELITE_EXPORT static bool downloadSystemLog(
-        const std::string &robot_ip, const std::string &password,
-        const std::string &path,
-        std::function<void(int f_z, int r_z, const char *err)> progress_cb);
+    ELITE_EXPORT static bool downloadSystemLog(const std::string &robot_ip, const std::string &password, const std::string &path,
+                                               std::function<void(int f_z, int r_z, const char *err)> progress_cb);
     ControllerLog() {}
     ~ControllerLog() {}
 };
 
-
-} // namespace ELITE
+}  // namespace ELITE
 
 #endif
