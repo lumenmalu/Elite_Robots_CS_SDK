@@ -4,7 +4,7 @@
 Elite CS 系列机器人的SDK。
 
 ## Requirements
- * **RT ROBOT & RT SERVER* (机器人的控制软件) version >=**2.13.x**(for CS-Series). 如果机器人的控制软件版本低于此，建议升级之。  
+ * **RT ROBOT & RT SERVER* (机器人的控制软件) version >=**2.14.x**(for CS-Series). 如果机器人的控制软件版本低于此，建议升级之。  
 
 ## Build & Install
 如果你的操作系统是 Ubuntu20.04、Ubuntu22.04、Ubuntu24.04，那么可以用下面的指令直接安装elite-cs-series-sdk:
