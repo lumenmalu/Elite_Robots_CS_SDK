@@ -1,19 +1,21 @@
-﻿#define NOMINMAX
-#include <string>
-#include <fstream>
-#include <vector>
-#include <stdexcept>
-#include <sstream>
-#include <algorithm>
-#include <fcntl.h>
+﻿#include <fcntl.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-#ifdef _WIN32
+#if defined(__linux) || defined(linux) || defined(__linux__)
+#include <sys/wait.h>
+#include <unistd.h>
+#elif _WIN32
+#define NOMINMAX
 #include <io.h>
 #define stat _stat64
-#else
-#include <sys/stat.h>
 #endif
 
 #ifdef ELITE_USE_LIB_SSH
@@ -27,9 +29,7 @@ namespace ELITE {
 
 namespace SSH_UTILS {
 
-std::string executeCommand(const std::string &host, const std::string &user,
-                           const std::string &password,
-                           const std::string &cmd) {
+std::string executeCommand(const std::string& host, const std::string& user, const std::string& password, const std::string& cmd) {
 #ifdef ELITE_USE_LIB_SSH
     ssh_session session = ssh_new();
     if (!session) {
@@ -39,20 +39,20 @@ std::string executeCommand(const std::string &host, const std::string &user,
 
     ssh_options_set(session, SSH_OPTIONS_HOST, host.c_str());
     ssh_options_set(session, SSH_OPTIONS_USER, user.c_str());
-    
+
     if (ssh_connect(session) != SSH_OK) {
         ELITE_LOG_ERROR("SSH connection failed: %s", ssh_get_error(session));
         ssh_free(session);
         return "";
     }
-    
+
     if (ssh_userauth_password(session, nullptr, password.c_str()) != SSH_AUTH_SUCCESS) {
         ELITE_LOG_ERROR("Authentication failed: %s", ssh_get_error(session));
         ssh_disconnect(session);
         ssh_free(session);
         return "";
     }
-    
+
     ssh_channel channel = ssh_channel_new(session);
     if (!channel) {
         ELITE_LOG_ERROR("Failed to create SSH channel");
@@ -60,7 +60,7 @@ std::string executeCommand(const std::string &host, const std::string &user,
         ssh_free(session);
         return "";
     }
-    
+
     if (ssh_channel_open_session(channel) != SSH_OK) {
         ELITE_LOG_ERROR("Failed to open SSH channel: %s", ssh_get_error(session));
         ssh_channel_free(channel);
@@ -68,7 +68,7 @@ std::string executeCommand(const std::string &host, const std::string &user,
         ssh_free(session);
         return "";
     }
-    
+
     if (ssh_channel_request_exec(channel, cmd.c_str()) != SSH_OK) {
         ELITE_LOG_ERROR("Failed to execute command: ", ssh_get_error(session));
         ssh_channel_close(channel);
@@ -77,7 +77,7 @@ std::string executeCommand(const std::string &host, const std::string &user,
         ssh_free(session);
         return "";
     }
-    
+
     char buffer[4096];
     int nbytes;
     std::string result;
@@ -85,40 +85,39 @@ std::string executeCommand(const std::string &host, const std::string &user,
         buffer[nbytes] = '\0';
         result += buffer;
     }
-    
+
     ssh_channel_send_eof(channel);
     ssh_channel_close(channel);
     ssh_channel_free(channel);
     ssh_disconnect(session);
     ssh_free(session);
-    
+
     return result;
 #else
 #if defined(__linux) || defined(linux) || defined(__linux__)
     int pipefd[2];
     if (pipe(pipefd) == -1) {
         char buf[256] = {0};
-        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
+        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %s", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
         return "";
     }
 
     pid_t pid = fork();
     if (pid == -1) {
         char buf[256] = {0};
-        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
+        ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %s", cmd.c_str(), strerror_r(errno, buf, sizeof(buf)));
         return "";
     }
 
-    if (pid == 0) { // child process
+    if (pid == 0) {  // child process
         // Close reader
-        close(pipefd[0]); 
+        close(pipefd[0]);
         // Redirect stdout to a pipe.
         dup2(pipefd[1], STDOUT_FILENO);
         // Close the writter (which has been duplicated to stdout).
-        close(pipefd[1]); 
-        execlp("sshpass", "sshpass", "-p", password.c_str(), 
-               "ssh", "-o", "StrictHostKeyChecking=no", 
-               (user + "@" + host).c_str(), cmd.c_str(), nullptr);
+        close(pipefd[1]);
+        execlp("sshpass", "sshpass", "-p", password.c_str(), "ssh", "-o", "StrictHostKeyChecking=no", (user + "@" + host).c_str(),
+               cmd.c_str(), nullptr);
         char err_buf[256] = {0};
         ELITE_LOG_ERROR("Execute cmd \"%s\" fail: %d", cmd.c_str(), strerror_r(errno, err_buf, sizeof(err_buf)));
         exit(1);
@@ -149,12 +148,42 @@ std::string executeCommand(const std::string &host, const std::string &user,
 #endif
 }
 
+static bool scpCommand(const std::string& password, const std::string& path1, const std::string& path2) {
+#if defined(__linux) || defined(linux) || defined(__linux__)
+    pid_t pid = fork();
+    if (pid == -1) {
+        char err_buf[256] = {0};
+        ELITE_LOG_ERROR("scp path1: \"%s\" path2: \"%s\" fail: %d", path1.c_str(), path2.c_str(),
+                        strerror_r(errno, err_buf, sizeof(err_buf)));
+        return false;
+    }
 
+    if (pid == 0) {
+        execlp("sshpass", "sshpass", "-p", password.c_str(), "scp", "-o", "StrictHostKeyChecking=no", path1.c_str(), path2.c_str(),
+               nullptr);
+        perror("execlp failed");
+        exit(1);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            ELITE_LOG_INFO("scp path1: \"%s\" path2: \"%s\" exited with status: %d", path1.c_str(), path2.c_str(),
+                           WEXITSTATUS(status));
+            if (status) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+#else
+    return false;
+#endif
+}
 
-bool downloadFile(const std::string& server, const std::string& user, 
-                  const std::string& password, const std::string& remote_path, 
-                  const std::string& local_path, 
-                  std::function<void (int f_z, int r_z, const char* err)> progress_cb) {
+bool downloadFile(const std::string& server, const std::string& user, const std::string& password, const std::string& remote_path,
+                  const std::string& local_path, std::function<void(int f_z, int r_z, const char* err)> progress_cb) {
 #ifdef ELITE_USE_LIB_SSH
     // Read 1 MB each time.
     constexpr int CHUNK_SIZE = 1048576;
@@ -168,7 +197,7 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_options_set(session, SSH_OPTIONS_USER, user.c_str());
 
     if (ssh_connect(session) != SSH_OK) {
-        ELITE_LOG_ERROR("SSH connection failed: %s",ssh_get_error(session));
+        ELITE_LOG_ERROR("SSH connection failed: %s", ssh_get_error(session));
         ssh_free(session);
         return false;
     }
@@ -240,45 +269,13 @@ bool downloadFile(const std::string& server, const std::string& user,
     ssh_free(session);
     return true;
 #else
-#if defined(__linux) || defined(linux) || defined(__linux__)
     (void)progress_cb;
-    pid_t pid = fork();
-    if (pid == -1) {
-        char err_buf[256] = {0};
-        ELITE_LOG_ERROR("scp file \"%s\" fail: %d", remote_path.c_str(), strerror_r(errno, err_buf, sizeof(err_buf)));
-        return false;
-    }
-
-    if (pid == 0) {
-        execlp("sshpass", "sshpass", "-p", password.c_str(), 
-               "scp", "-o", "StrictHostKeyChecking=no", 
-               (user + "@" + server + ":" + remote_path).c_str(), 
-               local_path.c_str(), 
-               nullptr);
-        perror("execlp failed");
-        exit(1);
-    } else {
-        int status;
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status)) {
-            ELITE_LOG_INFO("scp file \"%s\" exited with status: %d", remote_path.c_str(), WEXITSTATUS(status));
-            if (status) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-#else
-    return false;
-#endif
+    return scpCommand(password, (user + "@" + server + ":" + remote_path), local_path);
 #endif
 }
 
-bool uploadFile(const std::string& server, const std::string& user,
-                const std::string& password, const std::string& remote_path,
-                const std::string& local_path,
-                std::function<void(int f_z, int r_z, const char* err)> progress_cb) {
+bool uploadFile(const std::string& server, const std::string& user, const std::string& password, const std::string& remote_path,
+                const std::string& local_path, std::function<void(int f_z, int r_z, const char* err)> progress_cb) {
 #ifdef ELITE_USE_LIB_SSH
     // Write 1 MB each time.
     constexpr int CHUNK_SIZE = 1048576;
@@ -350,7 +347,7 @@ bool uploadFile(const std::string& server, const std::string& user,
     int last_percent = -1;
 
     ELITE_LOG_INFO("Uploading: %s (%d bytes)", local_path.c_str(), total_size);
-    
+
     while (local_file) {
         local_file.read(buffer.data(), sizeof(buffer));
         std::streamsize bytes_read = local_file.gcount();
@@ -379,10 +376,11 @@ bool uploadFile(const std::string& server, const std::string& user,
     ssh_free(session);
     return true;
 #else
-    return false;
+    (void)progress_cb;
+    return scpCommand(password, local_path, (user + "@" + server + ":" + remote_path));
 #endif
 }
 
-} // namespace SSH_UTILS
+}  // namespace SSH_UTILS
 
-} // namespace ELITE
+}  // namespace ELITE

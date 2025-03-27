@@ -26,8 +26,8 @@ endif()
 find_package(Boost REQUIRED)
 find_package(libssh)
 if(libssh_FOUND)
-        set(THIRDPARTY_LIB ${THIRDPARTY_LIB} ssh)
-        add_definitions(-DELITE_USE_LIB_SSH)
+    set(THIRDPARTY_LIB ${THIRDPARTY_LIB} ssh)
+    add_definitions(-DELITE_USE_LIB_SSH)
 endif()
 
 configure_file(
