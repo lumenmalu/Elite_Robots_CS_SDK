@@ -1,21 +1,23 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #include <string>
 #include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <sstream>
-
 #include <algorithm>
-#ifdef ELITE_USE_LIB_SSH
-    #include <libssh/libssh.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#ifdef _WIN32
+#include <io.h>
+#define stat _stat64
 #else
-    #if defined(__linux) || defined(linux) || defined(__linux__)
-        #include <sys/types.h>
-        #include <sys/wait.h>
-        #include <unistd.h>
-        #include <errno.h>
-        #include <string.h>
-    #endif
+#include <sys/stat.h>
+#endif
+
+#ifdef ELITE_USE_LIB_SSH
+#include <libssh/libssh.h>
 #endif
 
 #include "Common/SshUtils.hpp"
@@ -154,8 +156,8 @@ bool downloadFile(const std::string& server, const std::string& user,
                   const std::string& local_path, 
                   std::function<void (int f_z, int r_z, const char* err)> progress_cb) {
 #ifdef ELITE_USE_LIB_SSH
-    // Read 64 KB each time.
-    constexpr int CHUNK_SIZE = 65536;
+    // Read 1 MB each time.
+    constexpr int CHUNK_SIZE = 1048576;
     ssh_session session = ssh_new();
     if (!session) {
         ELITE_LOG_ERROR("Failed to create SSH session");
@@ -270,6 +272,114 @@ bool downloadFile(const std::string& server, const std::string& user,
 #else
     return false;
 #endif
+#endif
+}
+
+bool uploadFile(const std::string& server, const std::string& user,
+                const std::string& password, const std::string& remote_path,
+                const std::string& local_path,
+                std::function<void(int f_z, int r_z, const char* err)> progress_cb) {
+#ifdef ELITE_USE_LIB_SSH
+    // Write 1 MB each time.
+    constexpr int CHUNK_SIZE = 1048576;
+    ssh_session session = ssh_new();
+    if (!session) {
+        ELITE_LOG_ERROR("Failed to create SSH session");
+    }
+
+    ssh_options_set(session, SSH_OPTIONS_HOST, server.c_str());
+    ssh_options_set(session, SSH_OPTIONS_USER, user.c_str());
+
+    if (ssh_connect(session) != SSH_OK) {
+        ELITE_LOG_ERROR("SSH connection failed: %s", ssh_get_error(session));
+        ssh_free(session);
+        return false;
+    }
+
+    if (ssh_userauth_password(session, nullptr, password.c_str()) != SSH_AUTH_SUCCESS) {
+        ELITE_LOG_ERROR("SSH authentication failed: %s", ssh_get_error(session));
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+
+    std::ifstream local_file(local_path, std::ios::binary | std::ios::ate);
+    if (!local_file) {
+        ELITE_LOG_ERROR("Failed to open local file: %s", local_path);
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+
+    size_t total_size = local_file.tellg();
+    local_file.seekg(0, std::ios::beg);
+
+    ssh_scp scp = ssh_scp_new(session, SSH_SCP_WRITE | SSH_SCP_RECURSIVE, remote_path.c_str());
+    if (!scp) {
+        ELITE_LOG_ERROR("SCP session creation failed: %s", ssh_get_error(session));
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+
+    if (ssh_scp_init(scp) != SSH_OK) {
+        ELITE_LOG_ERROR("SCP initialization failed: ", ssh_get_error(session));
+        ssh_scp_free(scp);
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+
+#ifdef _WIN32
+#define FILE_PERMISSIONS (S_IREAD | S_IWRITE)
+#elif defined(__linux) || defined(linux) || defined(__linux__)
+#define FILE_PERMISSIONS (S_IRUSR | S_IWUSR)
+#endif
+    // File's infomation
+    if (ssh_scp_push_file(scp, remote_path.c_str(), total_size, FILE_PERMISSIONS) != SSH_OK) {
+        ELITE_LOG_ERROR("Failed to push file info: ", ssh_get_error(session));
+        ssh_scp_free(scp);
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+
+    // Write in chunks.
+    std::vector<char> buffer(CHUNK_SIZE);
+    size_t uploaded_size = 0;
+    int last_percent = -1;
+
+    ELITE_LOG_INFO("Uploading: %s (%d bytes)", local_path.c_str(), total_size);
+    
+    while (local_file) {
+        local_file.read(buffer.data(), sizeof(buffer));
+        std::streamsize bytes_read = local_file.gcount();
+        if (bytes_read > 0) {
+            if (ssh_scp_write(scp, buffer.data(), bytes_read) != SSH_OK) {
+                ELITE_LOG_ERROR("Failed to write to SCP session");
+                const char* ssh_err = ssh_get_error(session);
+                progress_cb(total_size, uploaded_size, ssh_err);
+                ssh_scp_free(scp);
+                ssh_disconnect(session);
+                ssh_free(session);
+                return false;
+            }
+            uploaded_size += bytes_read;
+        }
+        if (progress_cb) {
+            progress_cb(total_size, uploaded_size, nullptr);
+        }
+    }
+    ELITE_LOG_INFO("Upload complete!");
+
+    local_file.close();
+    ssh_scp_close(scp);
+    ssh_scp_free(scp);
+    ssh_disconnect(session);
+    ssh_free(session);
+    return true;
+#else
+    return false;
 #endif
 }
 

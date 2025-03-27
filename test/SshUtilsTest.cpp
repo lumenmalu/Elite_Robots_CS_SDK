@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdint>
 #include <chrono>
+#include <fstream>
 
 #include "Common/SshUtils.hpp"
 #include "Elite/Logger.hpp"
@@ -22,6 +23,19 @@ TEST(sshUtilsTest, ssh_utils_test) {
     EXPECT_NE(cmd_output.find("/usr/bin"), cmd_output.npos);
 }
 
+TEST(sshUtilsTest, ssh_file_test) {
+    std::ofstream o_file("./sdk_test.txt", std::ios::out | std::ios::trunc);
+    o_file << "abcd" << std::endl;
+    o_file.close();
+    
+    EXPECT_TRUE(SSH_UTILS::uploadFile(s_ip, s_user, s_ssh_pw, "/tmp/sdk_test.txt", "./sdk_test.txt", nullptr));
+    EXPECT_TRUE(SSH_UTILS::downloadFile(s_ip, s_user, s_ssh_pw, "/tmp/sdk_test.txt", "./sdk_test_dl.txt", nullptr));
+
+    std::ifstream i_file("./sdk_test_dl.txt");
+    std::string text;
+    i_file >> text;
+    EXPECT_EQ(text, "abcd");
+}
 
 int main(int argc, char** argv) {
     if (argc < 4 || argv[1] == nullptr || argv[2] == nullptr || argv[3] == nullptr) {
