@@ -70,7 +70,7 @@ bool ReverseInterface::writeJointCommand(const vector6d_t* pos, ControlMode mode
     data[REVERSE_DATA_SIZE - 1] = htonl((int)mode);
     if (pos) {
         for (size_t i = 0; i < 6; i++) {
-            data[i + 1] = htonl(round((*pos)[i] * CONTROL::POS_ZOOM_RATIO));
+            data[i + 1] = htonl(static_cast<int>(round((*pos)[i] * CONTROL::POS_ZOOM_RATIO)));
         }
     }
     
