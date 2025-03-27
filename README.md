@@ -17,56 +17,13 @@ sudo apt update
 sudo apt install elite-cs-series-sdk
 ```
 
-On the Windows platform, you can use the following steps to compile this project:
-```bash
-cd <clone of this repository>
-mkdir build && cd build
-cmake..
-cmake --build./
-```
-After compilation, two library files, `libelite-cs-series-sdk_static.lib` and `libelite-cs-series-sdk.dll`, and an `include` folder containing header files will be obtained.
-
-For the Linux platform, you can use the following steps to compile and install:
-```bash
-cd <clone of this repository>
-mkdir build && cd build
-cmake..
-make -j
-sudo make install
-```
+If compilation and installation are required, please refer to the [Compilation Guide](./doc/BuildGuide/BuildGuide.en.md). 
 
 ## User guide
 [English guide](./doc/UserGuide/en/UserGuide.en.md)
 
 ## Architecture
 [Code architecture](./doc/Architecture/Arch.en.md)
-
-## Document
-To compile the documentation, you need to install dependencies first:
-```bash
-sudo apt-get update
-sudo apt-get install doxygen
-sudo apt-get install doxygen-gui
-```
-
-You can compile the documentation using the following steps:
-```bash
-cd <clone of this repository>
-mkdir build && cd build
-cmake -DELITE_COMPILE_DOC=TRUE ..
-make -j
-```
-After compilation, in the `./build` directory, you can see the `./docs` directory, which contains the usage documentation.
-
-## Example
-In the folder `./example/`, there are examples of how to use this SDK. If you need to compile the examples, please refer to the following steps:
-```bash
-cd <clone of this repository>
-mkdir build && cd build
-cmake -DELITE_COMPILE_EXAMPLES=TRUE..
-make -j
-sudo make install
-```
 
 ## Compatible Operating Systems
 Tested on the following system platforms:

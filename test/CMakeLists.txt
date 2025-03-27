@@ -1,3 +1,5 @@
+find_package(GTest CONFIG REQUIRED)
+
 enable_testing()
 
 configure_file(${PROJECT_SOURCE_DIR}/example/resource/input_recipe.txt ${PROJECT_BINARY_DIR}/test/ COPYONLY)
@@ -18,9 +20,9 @@ foreach(SOURCE ${SOURCES})
     )
     target_link_libraries(
         ${ELITE_SDK_TEST_NAME}
-        elite-cs-series-sdk::shared
-        gtest
-        pthread
+        elite-cs-series-sdk::static
+        GTest::gtest
+        ${SYSTEM_LIB}
     )
     target_link_directories(
         ${ELITE_SDK_TEST_NAME} 
