@@ -154,6 +154,14 @@ public:
     ELITE_EXPORT SafetyMode safetyMode();
 
     /**
+     * @brief Restart safety system
+     * 
+     * @return true success
+     * @return false fail
+     */
+    ELITE_EXPORT bool safetySystemRestart();
+
+    /**
      * @brief Get task status
      * 
      * @return TaskStatus task status
@@ -274,15 +282,17 @@ public:
      * @return true saved 
      */
     ELITE_EXPORT bool isTaskSaved();
+
+    /**
+     * @brief Send a dashboard command and receive a response.
+     * 
+     * @param cmd Dashboard command
+     * @return std::string Response
+     */
+    ELITE_EXPORT std::string sendAndReceive(const std::string& cmd);
 private:
     class Impl;
     std::unique_ptr<Impl> impl_;
-
-    enum ConnectionState {
-        DISCONNECTED,
-        CONNECTED
-    };
-    
 
     std::string asyncReadLine(unsigned timeout_ms = 10000);
     void sendCommand(const std::string& cmd);

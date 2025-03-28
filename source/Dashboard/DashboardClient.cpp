@@ -15,7 +15,6 @@ public:
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket_ptr_;
     std::unique_ptr<boost::asio::ip::tcp::resolver> resolver_ptr_;
-    ConnectionState connection_state_;
 
     void disconnect();
 };
@@ -52,7 +51,6 @@ bool DashboardClient::connect(const std::string& ip, int port) {
                 ret_val = false;
             } else {
                 ret_val = true;
-                impl_->connection_state_ = CONNECTED;
             }
         });
 
@@ -80,7 +78,6 @@ void DashboardClient::disconnect() {
 
 void DashboardClient::Impl::disconnect() {
     socket_ptr_.reset();
-    connection_state_ = ConnectionState::DISCONNECTED;
 }
 
 
@@ -247,6 +244,11 @@ SafetyMode DashboardClient::safetyMode() {
     }
 }
 
+bool DashboardClient::safetySystemRestart() {
+    sendAndRequest("safety -r\n", "Restarting safety board.*");
+    return waitForReply("safety -m\n", "Safety mode: NORMAL\r\n");
+}
+
 TaskStatus DashboardClient::runningStatus() {
     std::string request = sendAndRequest("status\n", "RunningStatus:.*");
     std::size_t pos = request.find(": ");
@@ -377,6 +379,11 @@ bool DashboardClient::isTaskSaved() {
     } else {
         return false;
     }
+}
+
+std::string DashboardClient::sendAndReceive(const std::string& cmd) {
+    sendCommand(cmd);
+    return asyncReadLine();
 }
 
 std::string DashboardClient::asyncReadLine(unsigned timeout_ms) {
