@@ -429,6 +429,27 @@ public:
      */
     ELITE_EXPORT double getOutDoubleRegister(int index);
 
+    /**
+     * @brief Get data from output recipe
+     * 
+     * @tparam T data type
+     * @param name Variable name
+     * @param out_value Output value
+     */
+     template<typename T>
+     ELITE_EXPORT void getRecipeValue(const std::string& name, T& out_value);
+ 
+     /**
+      * @brief Set the input recipe value
+      * 
+      * @tparam T data type
+      * @param name Variable name
+      * @param value Set value
+      * @return false fail
+      */
+     template<typename T>
+     ELITE_EXPORT bool setInputRecipeValue(const std::string &name, const T& value);
+
 private:
     volatile bool input_new_cmd_;
     std::vector<std::string> input_recipe_string_;
@@ -461,27 +482,6 @@ private:
      * @return std::vector<std::string> The field for the subscription item
      */
     std::vector<std::string> readRecipe(const std::string& file);
-
-    /**
-     * @brief Get data from output recipe
-     * 
-     * @tparam T data type
-     * @param name Variable name
-     * @param out_value Output value
-     */
-    template<typename T>
-    void getRecipeValue(const std::string& name, T& out_value);
-
-    /**
-     * @brief Set the input recipe value
-     * 
-     * @tparam T data type
-     * @param name Variable name
-     * @param value Set value
-     * @return false fail
-     */
-    template<typename T>
-    bool setInputRecipeValue(const std::string &name, const T& value);
 
 };
 
