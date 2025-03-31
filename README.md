@@ -25,6 +25,9 @@ If compilation and installation are required, please refer to the [Compilation G
 ## Architecture
 [Code architecture](./doc/Architecture/Arch.en.md)
 
+## API document
+[API](./doc/API/en/API.en.md)
+
 ## Compatible Operating Systems
 Tested on the following system platforms:
 

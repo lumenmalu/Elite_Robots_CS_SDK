@@ -44,8 +44,8 @@ public:
     /**
      * @brief Parser sub-package. Internal use.
      * 
-     * @param len 
-     * @param iter 
+     * @param len The len of sub-package
+     * @param iter Position of the sub-package in the entire package
      */
     ELITE_EXPORT virtual void parser(int len, const std::vector<uint8_t>::const_iterator& iter) = 0;
 

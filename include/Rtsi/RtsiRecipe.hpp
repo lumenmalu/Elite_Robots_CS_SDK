@@ -49,7 +49,7 @@ public:
      * @return false fail
      */
     template<typename T>
-    bool getValue(const std::string& name, T& out_value) {
+    ELITE_EXPORT bool getValue(const std::string& name, T& out_value) {
         std::lock_guard<std::mutex> lock(update_mutex_);
         auto iter = value_table_.find(name);
         if (iter != value_table_.end()) {
@@ -73,7 +73,7 @@ public:
      * @return false fail
      */
     template<typename T>
-    bool setValue(const std::string& name, const T& value) {
+    ELITE_EXPORT bool setValue(const std::string& name, const T& value) {
         std::lock_guard<std::mutex> lock(update_mutex_);
         auto iter = value_table_.find(name);
         if (iter != value_table_.end()) {
@@ -87,14 +87,14 @@ public:
      * 
      * @return const std::vector<std::string>& The list of variable names
      */
-    const std::vector<std::string>& getRecipe() const { return recipe_list_; }
+    ELITE_EXPORT const std::vector<std::string>& getRecipe() const { return recipe_list_; }
 
     /**
      * @brief Get the recipe ID, range 1 ~ 254
      * 
      * @return int The recipe ID
      */
-    int getID() const { return recipe_id_; }
+    ELITE_EXPORT int getID() const { return recipe_id_; }
 
 protected:
     RtsiRecipe() = default;

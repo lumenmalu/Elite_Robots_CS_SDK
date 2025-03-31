@@ -22,6 +22,9 @@ sudo apt install elite-cs-series-sdk
 ## Architecture
 [代码架构](./doc/Architecture/Arch.cn.md)
 
+## API 说明
+[API](./doc/API/cn/API.cn.md)
+
 ## Compatible Operating Systems
 在以下系统平台上测试过：
 
