@@ -1,7 +1,7 @@
 # RTSI
 
 ## Introduction
-RTSI is the real-time communication interface of Elite robots, which can be used to obtain robot status, set I/O, etc. The SDK provides two interfaces for RTSI: `RtsiClientInterface` and `RtsiIOInterface`. `RtsiClientInterface` requires manual operations such as connection and version verification. `RtsiIOInterface` encapsulates most of the interfaces. In actual testing, the real-time performance of `RtsiIOInterface` is slightly worse, while the real-time performance of `RtsiClientInterface` depends on the user's code.
+RTSI is the real-time communication interface of Elite robots, which can be used to obtain the robot's status, set the I/O, etc. The SDK provides two interfaces for RTSI: `RtsiClientInterface` and `RtsiIOInterface`. `RtsiClientInterface` requires manual operations such as connection and version verification. `RtsiIOInterface`, on the other hand, encapsulates most of the interfaces. In actual tests, the real-time performance of `RtsiIOInterface` is slightly worse, while the real-time performance of `RtsiClientInterface` depends on the user's code.
 
 # RtsiClientInterface Class
 
@@ -20,7 +20,7 @@ RTSI client
 void connect(const std::string& ip, int port = 30004)
 ```
 - ***Function***
-Connects to the robot's RTSI port.
+Connects to the RTSI port of the robot.
 - ***Parameters***
     - ip: The IP address of the robot.
     - port: The RTSI port.
@@ -165,7 +165,7 @@ Checks whether the robot data synchronization has been started.
 bool isReadAvailable()
 ```
 - ***Function***
-Checks whether there is readable data. It is usually used to determine whether there is readable data in the buffer when receiving the robot status.
+Checks whether there is readable data. It is usually used to determine whether there is readable data in the buffer when receiving the robot's status.
 - ***Return Value***: Returns true if yes, and false if no.
 
 ---
@@ -173,7 +173,7 @@ Checks whether there is readable data. It is usually used to determine whether t
 # RtsiIOInterface Class
 
 ## Introduction
-Inherits from the `RtsiClientInterface` class. This interface further encapsulates `RtsiClientInterface` and starts a thread internally to synchronize the robot data. Since this interface encapsulates many interfaces with the same nature, such as: getPayloadMass(), getTimestamp(), etc. For such interfaces, they will not be elaborated in the document for now. You can directly check the comments in the header file to obtain their functions.
+It inherits from the `RtsiClientInterface` class. This interface further encapsulates `RtsiClientInterface` and starts a thread internally to synchronize the robot data.
 
 ## Header File
 ```cpp
@@ -189,8 +189,8 @@ RtsiIOInterface::RtsiIOInterface(const std::string& output_recipe_file, const st
 - ***Function***
 Initializes the data and reads the two files `output_recipe_file` and `input_recipe_file` to obtain the subscription recipes. The format of the recipe file is:  
 ```
-Subscription item 1
-Subscription item 2
+Subscription Item 1
+Subscription Item 2
 ```
 - ***Parameters***
     - output_recipe_file: The path of the output recipe file.
@@ -204,7 +204,7 @@ Subscription item 2
 RtsiIOInterface::~RtsiIOInterface()
 ```
 - ***Function***
-Disconnects the socket, ends the data synchronization thread, and releases resources.
+Disconnects the socket, ends the data synchronization thread, and releases the resources.
 
 ## Interfaces
 
@@ -225,92 +225,397 @@ Connects to the robot's RTSI port, performs version verification, obtains the ro
 void disconnect()
 ```
 - ***Function***
-Disconnects the socket with the robot and ends the data synchronization thread.
-
-### Get the Value of the Output Recipe
-```cpp
-template<typename T>
-bool getRecipeValue(const std::string& name, T& out_value);
-```
-- ***Function***
-Gets the value of the specified subscription item in the output recipe.
-- ***Parameters***
-    - name: The name of the subscription item.
-    - out_value: The output value. Note that the type of this value needs to be consistent with the type in the RTSI document.
-- ***Return Value***: Returns true if the acquisition is successful, and false if failed.
+Disconnects the socket from the robot and ends the data synchronization thread.
 
 ---
 
-### Set the Value of the Output Recipe
+### Get the Controller Version
 ```cpp
-template <typename T>
-bool setInputRecipeValue(const std::string& name, const T& value)
+virtual VersionInfo getControllerVersion()
 ```
 - ***Function***
-Sets the value of the specified subscription item in the input recipe.
+Gets the controller version information.
+- ***Return Value***: A VersionInfo object containing the major version number, minor version number, patch number, and build number.
+
+---
+
+### Set the Speed Scaling
+```cpp
+bool setSpeedScaling(double scaling)
+```
+- ***Function***
+Sets the speed scaling of the robot.
 - ***Parameters***
-    - name: The name of the subscription item.
-    - out_value: The input value. Note that the type of this value needs to be consistent with the type in the RTSI document.
+    - scaling: The target speed scaling.
 - ***Return Value***: Returns true if the setting is successful, and false if failed.
 
 ---
 
-# RtsiRecipe Class
-
-## Introduction
-This interface provides some basic operations for the RTSI recipe. The RtsiRecipe class can only be obtained by the two interfaces `RtsiClientInterface::setupOutputRecipe()` and `RtsiClientInterface::setupInputRecipe()`.
-
-## Header File
+### Set the Standard Digital I/O
 ```cpp
-#include <Elite/RtsiRecipe.hpp>
-```
-
-## Interfaces
-
-### ***Get Value***
-```cpp
-template<typename T>
-bool getValue(const std::string& name, T& out_value)
+bool setStandardDigital(int index, bool level)
 ```
 - ***Function***
-Gets the value of the subscription item in the recipe.
+Sets the level of the standard digital I/O.
 - ***Parameters***
-    - name: The name of the subscription item.
-    - out_value: The output value of the subscription item. Note that the type of this value needs to be consistent with the type in the RTSI document.
-- ***Return Value***: Returns true if the acquisition is successful, and false if failed.
-
----
-
-### ***Set Value***
-```cpp
-template<typename T>
-bool setValue(const std::string& name, const T& value)
-```
-- ***Function***
-Sets the value of the subscription item in the recipe.
-- ***Parameters***
-    - name: The name of the subscription item.
-    - out_value: The setting value of the subscription item. Note that the type of this value needs to be consistent with the type in the RTSI document.
+    - index: The index of the standard digital I/O.
+    - level: High/Low level.
 - ***Return Value***: Returns true if the setting is successful, and false if failed.
 
 ---
 
-### Get the Recipe
+### Set the Configurable Digital I/O
 ```cpp
-const std::vector<std::string>& getRecipe()
+bool setConfigureDigital(int index, bool level)
 ```
 - ***Function***
-Gets the list of the names of the subscription items in the recipe.
-- ***Return Value***: The list of the names of the subscription items in the recipe.
+Sets the level of the configurable digital I/O.
+- ***Parameters***
+    - index: The index of the configurable digital I/O.
+    - level: High/Low level.
+- ***Return Value***: Returns true if the setting is successful, and false if failed.
 
 ---
 
-### Get the Recipe ID
+### Set the Analog Output Voltage
 ```cpp
-int getID()
+bool setAnalogOutputVoltage(int index, double value)
 ```
 - ***Function***
-Gets the recipe ID.
-- ***Return Value***: The recipe ID.
+Sets the analog output voltage.
+- ***Parameters***
+    - index: The index of the analog I/O.
+    - value: The voltage value (unit: V, range [0,10]V).
+- ***Return Value***: Returns true if the setting is successful, and false if failed.
 
 ---
+
+### Set the Analog Output Current
+```cpp
+bool setAnalogOutputCurrent(int index, double value)
+```
+- ***Function***
+Sets the analog output current.
+- ***Parameters***
+    - index: The index of the analog I/O.
+    - value: The current value (unit: A, range [0.004,0.2]A).
+- ***Return Value***: Returns true if the setting is successful, and false if failed.
+
+---
+
+### Set the External Force and Torque
+```cpp
+bool setExternalForceTorque(const vector6d_t& value)
+```
+- ***Function***
+Inputs the data from the external force sensor (effective when ft_rtsi_input_enable is set to true).
+- ***Parameters***
+    - value: The data from the external force sensor.
+- ***Return Value***: Returns true if the setting is successful, and false if failed.
+
+---
+
+### Set the Tool Digital Output
+```cpp
+bool setToolDigitalOutput(int index, bool level)
+```
+- ***Function***
+Sets the level of the tool digital output.
+- ***Parameters***
+    - index: The index of the tool output I/O.
+    - level: The level value.
+- ***Return Value***: Returns true if the setting is successful, and false if failed.
+
+---
+
+### Get the Timestamp
+```cpp
+double getTimestamp()
+```
+- ***Function***
+Gets the timestamp.
+- ***Return Value***: The timestamp (unit: seconds).
+
+---
+
+### Get the Payload Mass
+```cpp
+double getPayloadMass()
+```
+- ***Function***
+Gets the mass of the end effector payload.
+- ***Return Value***: The payload mass (unit: kg).
+
+---
+
+### Get the Payload Center of Gravity
+```cpp
+vector3d_t getPayloadCog()
+```
+- ***Function***
+Gets the center of gravity of the end effector payload.
+- ***Return Value***: The coordinates of the payload center of gravity (unit: m).
+
+---
+
+### Get the Script Control Line Number
+```cpp
+uint32_t getScriptControlLine()
+```
+- ***Function***
+Gets the line number of the running script.
+- ***Return Value***: The line number of the script.
+
+---
+
+### Get the Target Joint Positions
+```cpp
+vector6d_t getTargetJointPositions()
+```
+- ***Function***
+Gets the target joint positions.
+- ***Return Value***: The joint positions (unit: rad).
+
+---
+
+### Get the Target Joint Velocity
+```cpp
+vector6d_t getTargetJointVelocity()
+```
+- ***Function***
+Gets the target joint velocity.
+- ***Return Value***: The joint velocity (unit: rad/s).
+
+---
+
+### Get the Actual Joint Positions
+```cpp
+vector6d_t getActualJointPositions()
+```
+- ***Function***
+Gets the actual joint positions.
+- ***Return Value***: The joint positions (unit: rad).
+
+---
+
+### Get the Actual Joint Torques
+```cpp
+vector6d_t getActualJointTorques()
+```
+- ***Function***
+Gets the actual joint torques.
+- ***Return Value***: The joint torques (unit: N*m).
+
+---
+
+### Get the Actual Joint Velocity
+```cpp
+vector6d_t getActualJointVelocity()
+```
+- ***Function***
+Gets the actual joint velocity.
+- ***Return Value***: The joint velocity (unit: rad/s).
+
+---
+
+### Get the Actual Joint Current
+```cpp
+vector6d_t getActualJointCurrent()
+```
+- ***Function***
+Gets the actual joint current.
+- ***Return Value***: The joint current (unit: A).
+
+---
+
+### Get the Actual Joint Temperatures
+```cpp
+vector6d_t getActualJointTemperatures()
+```
+- ***Function***
+Gets the actual joint temperatures.
+- ***Return Value***: The joint temperatures (unit: degrees Celsius).
+
+---
+
+### Get the Actual TCP Pose
+```cpp
+vector6d_t getAcutalTCPPose()
+```
+- ***Function***
+Gets the actual Cartesian coordinates of the tool.
+- ***Return Value***: [x, y, z, rx, ry, rz], where x, y, z are position vectors, and rx, ry, rz are rotation vectors.
+
+---
+
+### Get the Actual TCP Velocity
+```cpp
+vector6d_t getAcutalTCPVelocity()
+```
+- ***Function***
+Gets the actual Cartesian velocity of the tool.
+- ***Return Value***: [x, y, z, rx, ry, rz]/s, where x, y, z are position vectors, and rx, ry, rz are rotation vectors.
+
+---
+
+### Get the Actual TCP Force
+```cpp
+vector6d_t getAcutalTCPForce()
+```
+- ***Function***
+Gets the generalized force of the TCP (subtracting the force data caused by the payload).
+- ***Return Value***: The TCP force vector.
+
+---
+
+### Get the Target TCP Pose
+```cpp
+vector6d_t getTargetTCPPose()
+```
+- ***Function***
+Gets the target Cartesian coordinates of the tool.
+- ***Return Value***: [x, y, z, rx, ry, rz], where x, y, z are position vectors, and rx, ry, rz are rotation vectors.
+
+---
+
+### Get the Target TCP Velocity
+```cpp
+vector6d_t getTargetTCPVelocity()
+```
+- ***Function***
+Gets the target Cartesian velocity of the tool.
+- ***Return Value***: [x, y, z, rx, ry, rz], where x, y, z are position vectors, and rx, ry, rz are rotation vectors.
+
+---
+
+### Get the Digital Input Bits
+```cpp
+uint32_t getDigitalInputBits()
+```
+- ***Function***
+Gets the bit values of all digital input I/Os.
+- ***Return Value***:
+    - bits 0-15: Standard digital input.
+    - bits 16-24: Configurable digital input.
+    - bits 24-28: Tool digital input.
+
+---
+
+### Get the Digital Output Bits
+```cpp
+uint32_t getDigitalOutputBits()
+```
+- ***Function***
+Gets the bit values of all digital output I/Os.
+- ***Return Value***:
+    - bits 0-15: Standard digital input.
+    - bits 16-24: Configurable digital input.
+    - bits 24-28: Tool digital input.
+
+---
+
+### Get the Robot Mode
+```cpp
+RobotMode getRobotMode()
+```
+- ***Function***
+Gets the robot mode.
+- ***Return Value***: An enumeration value of RobotMode.
+
+---
+
+### Get the Joint Mode
+```cpp
+std::array<JointMode, 6> getJointMode()
+```
+- ***Function***
+Gets the mode of each joint.
+- ***Return Value***: An array containing 6 JointMode values.
+
+---
+
+### Get the Safety Status
+```cpp
+SafetyMode getSafetyStatus()
+```
+- ***Function***
+Gets the robot's safety mode.
+- ***Return Value***: An enumeration value of SafetyMode.
+
+---
+
+### Get the Actual Speed Scaling
+```cpp
+double getActualSpeedScaling()
+```
+- ***Function***
+Gets the actual speed scaling of the robot.
+- ***Return Value***: The speed scaling value.
+
+---
+
+### Get the Target Speed Scaling
+```cpp
+double getTargetSpeedScaling()
+```
+- ***Function***
+Gets the target speed scaling of the robot.
+- ***Return Value***: The speed scaling value.
+
+---
+
+### Get the Robot Voltage
+```cpp
+double getRobotVoltage()
+```
+- ***Function***
+Gets the robot voltage (48V).
+- ***Return Value***: The voltage value (unit: V).
+
+---
+
+### Get the Robot Current
+```cpp
+double getRobotCurrent()
+```
+- ***Function***
+Gets the robot current.
+- ***Return Value***: The current value (unit: A).
+
+---
+
+### Get the Runtime State
+```cpp
+TaskStatus getRuntimeState()
+```
+- ***Function***
+Gets the program state.
+- ***Return Value***: An enumeration value of TaskStatus.
+
+---
+
+### Get the Elbow Position
+```cpp
+vector3d_t getElbowPosition()
+```
+- ***Function***
+Gets the real-time position of the robot's elbow.
+- ***Return Value***: [x, y, z] coordinates.
+
+---
+
+### Get the Elbow Velocity
+```cpp
+vector3d_t getElbowVelocity()
+```
+- ***Function***
+Gets the real-time velocity of the robot's elbow.
+- ***Return Value***: [x, y, z]/s velocity vector.
+
+---
+
+### Get the Robot Status
+```cpp
+uint32_t getRobotStatus()
+```
+- ***

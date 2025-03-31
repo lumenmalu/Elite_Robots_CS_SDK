@@ -212,7 +212,7 @@ bool isReadAvailable()
 
 ## 简介
 
-继承了`RtsiClientInterface`类。此接口对`RtsiClientInterface`进行了进一步封装，内部会启动一个线程来进行机器人数据的同步。由于此接口封装了很多性质相同的接口，如：getPayloadMass()、getTimestamp()等。对于此类接口，文档中暂不做赘述，可直接查看头文件中的注释以获取其功能。
+继承了`RtsiClientInterface`类。此接口对`RtsiClientInterface`进行了进一步封装，内部会启动一个线程来进行机器人数据的同步。
 
 ## 头文件
 ```cpp

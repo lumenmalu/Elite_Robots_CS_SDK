@@ -4,18 +4,18 @@ This document is intended to explain the API features in the SDK.
 
 Applicable SDK version: ***v1.2.0***
 
-- [EliteDriver](./EliteDriver.cn.md)
+- [EliteDriver](./EliteDriver.en.md)
 
-- [PrimaryPort](./PrimaryPort.cn.md)
+- [PrimaryPort](./PrimaryPort.en.md)
 
-- [RTSI](./RTSI.cn.md)
+- [RTSI](./RTSI.en.md)
 
-- [Dashboard](./Dashboard.cn.md)
+- [Dashboard](./Dashboard.en.md)
 
 - [Version info](./VersionInfo.cn.md)
 
-- [Log](./Log.cn.md)
+- [Log](./Log.en.md)
 
-- [Remote upgrade](./RemoteUpgrade.cn.md)
+- [Remote upgrade](./RemoteUpgrade.en.md)
 
-- [Controller log](./ControllerLog.cn.md)
+- [Controller log](./ControllerLog.en.md)
