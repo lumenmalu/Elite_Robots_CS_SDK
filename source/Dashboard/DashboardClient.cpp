@@ -371,7 +371,11 @@ bool DashboardClient::isTaskSaved() {
 }
 
 std::string DashboardClient::sendAndReceive(const std::string& cmd) {
-    sendCommand(cmd);
+    if (cmd.back() != '\n') {
+        sendCommand(cmd + "\n");
+    } else {
+        sendCommand(cmd);
+    }
     return asyncReadLine();
 }
 
