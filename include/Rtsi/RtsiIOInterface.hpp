@@ -439,7 +439,7 @@ class RtsiIOInterface : public RtsiClientInterface {
      * @param out_value Output value
      */
     template <typename T>
-    ELITE_EXPORT bool getRecipeValue(const std::string& name, T& out_value) {
+    bool getRecipeValue(const std::string& name, T& out_value) {
         if (output_recipe_) {
             return output_recipe_->getValue(name, out_value);
         }
@@ -455,7 +455,7 @@ class RtsiIOInterface : public RtsiClientInterface {
      * @return false fail
      */
     template <typename T>
-    ELITE_EXPORT bool setInputRecipeValue(const std::string& name, const T& value) {
+    bool setInputRecipeValue(const std::string& name, const T& value) {
         if (input_recipe_) {
             bool ret = input_recipe_->setValue(name, value);
             input_new_cmd_ = true;

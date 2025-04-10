@@ -49,7 +49,7 @@ public:
      * @return false fail
      */
     template<typename T>
-    ELITE_EXPORT bool getValue(const std::string& name, T& out_value) {
+    bool getValue(const std::string& name, T& out_value) {
         std::lock_guard<std::mutex> lock(update_mutex_);
         auto iter = value_table_.find(name);
         if (iter != value_table_.end()) {
@@ -73,7 +73,7 @@ public:
      * @return false fail
      */
     template<typename T>
-    ELITE_EXPORT bool setValue(const std::string& name, const T& value) {
+    bool setValue(const std::string& name, const T& value) {
         std::lock_guard<std::mutex> lock(update_mutex_);
         auto iter = value_table_.find(name);
         if (iter != value_table_.end()) {
