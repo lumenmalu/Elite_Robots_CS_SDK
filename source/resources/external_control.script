@@ -53,8 +53,7 @@ global cmd_speedl_tool_speed
 global cmd_speed_joint
 global steptime
 global trajectory_point_num
-global cmd_servo_state, cmd_servo_joints_last, cmd_servo_joints
-global extrapolate_max_count, extrapolate_count
+global cmd_servo_joints_last, cmd_servo_joints
 global violation_popup_counter
 
 """
@@ -117,8 +116,7 @@ def trajectoryThread():
     socket_send_int(TRAJECTORY_RESULT_SUCCESS, "trajectory_socket")
 
 def setServoSetpoint(joints):
-    global cmd_servo_state, cmd_servo_joints_last, cmd_servo_joints
-    cmd_servo_state = SERVO_RUNNING
+    global cmd_servo_joints_last, cmd_servo_joints
     if targetWithinLimits(cmd_servo_joints, joints, steptime):
         cmd_servo_joints_last = cmd_servo_joints
         cmd_servo_joints = joints
@@ -130,46 +128,6 @@ def setServoSetpoint(joints):
     elif targetWithinLimits(get_actual_joint_positions(), joints, steptime):
         cmd_servo_joints_last = cmd_servo_joints
         cmd_servo_joints = joints
-
-def extrapolate():
-    global cmd_servo_joints_last, cmd_servo_joints
-    cmd_servo_joints_last = cmd_servo_joints
-    target_speed = get_target_joint_speeds()
-    for i in range(len(target_speed)):
-        cmd_servo_joints[i] = cmd_servo_joints[i] + (target_speed[i] * steptime)
-    return cmd_servo_joints
-
-def servoThread():
-    global cmd_servo_state, cmd_servo_joints
-    global extrapolate_max_count, extrapolate_count
-    textmsg("ExternalControl: Starting servo thread")
-    state = SERVO_IDLE
-    while control_mode == MODE_SERVOJ:
-        joints = cmd_servo_joints
-        do_extrapolate = False
-        if (cmd_servo_state == SERVO_IDLE):
-            do_extrapolate = True
-
-        state = cmd_servo_state
-        if cmd_servo_state > SERVO_UNINITIALIZED:
-            cmd_servo_state = SERVO_IDLE
-
-        if do_extrapolate:
-            extrapolate_count = extrapolate_count + 1
-            if extrapolate_count > extrapolate_max_count:
-                extrapolate_max_count = extrapolate_count
-            joints = extrapolate()
-            servoj(joints, {{SERVO_J_REPLACE}})
-
-        elif state == SERVO_RUNNING:
-            extrapolate_count = 0
-            servoj(joints, {{SERVO_J_REPLACE}})
-        else:
-            extrapolate_count = 0
-            sync()
-    textmsg("ExternalControl: servo thread ended")
-    stopj(STOPJ_ACCELERATION)
-
 
 def trajectoryClearPoints():
     global trajectory_point_num
@@ -246,11 +204,8 @@ cmd_speed_joint = [0, 0, 0, 0, 0, 0]
 control_mode = MODE_UNINITIALIZED
 steptime = get_steptime()
 trajectory_point_num = 0
-cmd_servo_state = SERVO_UNINITIALIZED
 cmd_servo_joints = get_actual_joint_positions()
 cmd_servo_joints_last = get_actual_joint_positions()
-extrapolate_count = 0
-extrapolate_max_count = 0
 script_command_thread_handle = start_thread(scriptCommands, ())
 move_thread_handle = 0
 trajectory_thread_handle = 0
@@ -289,12 +244,12 @@ while control_mode > MODE_STOPPED:
                 move_thread_handle = start_thread(speedjThread, ())
             elif control_mode == MODE_SERVOJ:
                 cmd_servo_joints = get_actual_joint_positions()
-                move_thread_handle = start_thread(servoThread, ())
             
         # Update the motion commands with new parameters
         if control_mode == MODE_SERVOJ:
             joints = [params_mult[2]/ POS_ZOOM_RATIO, params_mult[3]/ POS_ZOOM_RATIO, params_mult[4]/ POS_ZOOM_RATIO, params_mult[5]/ POS_ZOOM_RATIO, params_mult[6]/ POS_ZOOM_RATIO, params_mult[7]/ POS_ZOOM_RATIO]
             setServoSetpoint(joints)
+            servoj(cmd_servo_joints)
         elif control_mode == MODE_SPEEDL:
             setSpeedl([params_mult[2] / POS_ZOOM_RATIO, params_mult[3] / POS_ZOOM_RATIO, params_mult[4] / POS_ZOOM_RATIO, params_mult[5] / POS_ZOOM_RATIO, params_mult[6] / POS_ZOOM_RATIO, params_mult[7] / POS_ZOOM_RATIO])
         elif control_mode == MODE_SPEEDJ:
@@ -313,8 +268,6 @@ while control_mode > MODE_STOPPED:
                 trajectoryClearPoints()
                 stopj(STOPJ_ACCELERATION)
                 socket_send_int(TRAJECTORY_RESULT_CANCELED, "trajectory_socket")
-              
-
     else:
         textmsg("Socket timed out waiting for command on reverse_socket. The script will exit now.")
         control_mode = MODE_STOPPED
