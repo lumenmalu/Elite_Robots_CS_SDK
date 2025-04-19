@@ -38,7 +38,7 @@ bool DashboardClient::connect(const std::string& ip, int port) {
         boost::asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK> quickack(true);
         impl_->socket_ptr_->set_option(quickack);
 #endif
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ip), port);
         boost::system::error_code ec = boost::asio::error::would_block;
 
         impl_->socket_ptr_->async_connect(endpoint, [&](const boost::system::error_code& error) {

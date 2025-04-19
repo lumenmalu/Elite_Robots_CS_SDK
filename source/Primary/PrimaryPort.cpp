@@ -28,7 +28,7 @@ bool PrimaryPort::connect(const std::string& ip, int port) {
 #if defined(__linux) || defined(linux) || defined(__linux__)
         socket_ptr_->set_option(boost::asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
 #endif
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ip), port);
         boost::system::error_code connect_ec;
         socket_ptr_->async_connect(endpoint, [&](const boost::system::error_code& ec){
             connect_ec = ec;
@@ -183,7 +183,9 @@ void PrimaryPort::socketAsyncLoop() {
     while (socket_async_thread_alive_) {
         try {
             if (io_context_.stopped()) {
-                io_context_.reset();
+                auto work = boost::asio::make_work_guard(io_context_);
+                io_context_.run();
+                work.reset();
             }
             io_context_.run();
         } catch(const std::exception& e) {
