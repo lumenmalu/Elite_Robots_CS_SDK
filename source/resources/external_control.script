@@ -249,7 +249,7 @@ while control_mode > MODE_STOPPED:
         if control_mode == MODE_SERVOJ:
             joints = [params_mult[2]/ POS_ZOOM_RATIO, params_mult[3]/ POS_ZOOM_RATIO, params_mult[4]/ POS_ZOOM_RATIO, params_mult[5]/ POS_ZOOM_RATIO, params_mult[6]/ POS_ZOOM_RATIO, params_mult[7]/ POS_ZOOM_RATIO]
             setServoSetpoint(joints)
-            servoj(cmd_servo_joints)
+            servoj(cmd_servo_joints, {{SERVO_J_REPLACE}})
         elif control_mode == MODE_SPEEDL:
             setSpeedl([params_mult[2] / POS_ZOOM_RATIO, params_mult[3] / POS_ZOOM_RATIO, params_mult[4] / POS_ZOOM_RATIO, params_mult[5] / POS_ZOOM_RATIO, params_mult[6] / POS_ZOOM_RATIO, params_mult[7] / POS_ZOOM_RATIO])
         elif control_mode == MODE_SPEEDJ:
