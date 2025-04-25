@@ -27,7 +27,6 @@ private:
     std::mutex socket_mutex_;
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket_ptr_;
-    std::unique_ptr<boost::asio::ip::tcp::resolver> resolver_ptr_;
     
     // The buffer of package head
     std::vector<uint8_t> message_head_;
@@ -47,10 +46,10 @@ private:
     void socketAsyncLoop();
 
     /**
-     * @brief Receive and parser package head.
+     * @brief Receive and parser package.
      * 
      */
-    void parserMessageHead();
+    bool parserMessage();
 
     /**
      * @brief Receive and parser package body.
@@ -58,7 +57,7 @@ private:
      * @param type 
      * @param len 
      */
-    void parserMessageBody(int type, int len);
+    bool parserMessageBody(int type, int len);
 
 public:
     PrimaryPort();
@@ -98,12 +97,6 @@ public:
      * @return false fail
      */
     bool getPackage(std::shared_ptr<PrimaryPackage> pkg, int timeout_ms);
-
-    /**
-     * @brief Close and reset socket
-     * 
-     */
-    void socketClose();
 
 };
 
