@@ -95,9 +95,12 @@ bool PrimaryPort::getPackage(std::shared_ptr<PrimaryPackage> pkg, int timeout_ms
 
 bool PrimaryPort::parserMessage() {
     std::lock_guard<std::mutex> lock(socket_mutex_);
-    if (!socket_ptr_) {
+    if (!socket_ptr_ || !socket_ptr_->is_open()) {
         ELITE_LOG_WARN("Don't connect to robot primary port");
         return false;
+    }
+    if (socket_ptr_->available() <= HEAD_LENGTH) {
+        return true;
     }
     // Receive package head and parser it
     boost::system::error_code ec;
