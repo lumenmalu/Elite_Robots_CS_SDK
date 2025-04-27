@@ -70,12 +70,16 @@ public:
      * @param port The port(30001 or 30002)
      * @return true success
      * @return false fail
+     * @note 
+     *      1. Warning: Repeated calls to this function without intermediate disconnect() will force-close the active connection.
+     *      2. Usage constraint: Call rate must be ≤ 2Hz (once per 500ms minimum interval).
      */
     bool connect(const std::string& ip, int port);
 
     /**
      * @brief Disconnect socket.
      *  And wait for the background thread to finish.
+     * @note After calling this function, a delay of around 500ms should be added prior to calling connect().
      */
     void disconnect();
 

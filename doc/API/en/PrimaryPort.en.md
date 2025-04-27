@@ -37,6 +37,10 @@ Connects to the robot's port 30001 (by default).
     - timeout_ms: Sets the timeout for the robot to read the next instruction. If it is less than or equal to 0, it will wait indefinitely.
 - ***Return Value***: Returns true if successful, and false if failed.
 
+- ***Note***
+    1. Warning: Repeated calls to this function without intermediate disconnect() will force-close the active connection.
+    2. Usage constraint: Call rate must be ≤ 2Hz (once per 500ms minimum interval).
+
 ---
 
 ### ***Disconnection***
@@ -45,6 +49,10 @@ void disconnect()
 ```
 - ***Function***
 Disconnects from the robot.
+
+- ***Note***
+
+    Suggest adding ~500ms delay between this function and connect calls.
 
 ---
 
