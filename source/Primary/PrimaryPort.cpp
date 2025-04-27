@@ -3,6 +3,8 @@
 #include "Utils.hpp"
 #include "Log.hpp"
 
+using namespace std::chrono;
+
 namespace ELITE
 {
 using namespace std::chrono;
@@ -20,7 +22,6 @@ bool PrimaryPort::connect(const std::string& ip, int port) {
     try {
         std::lock_guard<std::mutex> lock(socket_mutex_);
         socket_ptr_.reset(new boost::asio::ip::tcp::socket(io_context_));
-        resolver_ptr_.reset(new boost::asio::ip::tcp::resolver(io_context_));
         socket_ptr_->open(boost::asio::ip::tcp::v4());
         socket_ptr_->set_option(boost::asio::ip::tcp::no_delay(true));
         socket_ptr_->set_option(boost::asio::socket_base::reuse_address(true));
@@ -45,37 +46,23 @@ bool PrimaryPort::connect(const std::string& ip, int port) {
         throw EliteException(EliteException::Code::SOCKET_CONNECT_FAIL, error.what());
         return false;
     }
-
-    // Added asynchronously read and parse packets
-    parserMessageHead();
-    // Start async thread
-    socket_async_thread_alive_ = true;
-    socket_async_thread_.reset(new std::thread([&](){
-        socketAsyncLoop();
-    }));
-    
+    if (!socket_async_thread_) {
+        // Start async thread
+        socket_async_thread_alive_ = true;
+        socket_async_thread_.reset(new std::thread([&](){
+            socketAsyncLoop();
+        }));
+    }
     return true;
 }
 
-void PrimaryPort::socketClose() {
-    std::lock_guard<std::mutex> lock(socket_mutex_);
-    socket_async_thread_alive_ = false;
-    if (socket_ptr_) {
-        boost::system::error_code ec;
-        socket_ptr_->cancel(ec);
-        socket_ptr_->close(ec);
-        if (ec) {
-            throw EliteException(EliteException::Code::SOCKET_FAIL, 
-                                 boost::system::system_error(ec).what());
-            return;
-        }
-    }
-    socket_ptr_.reset();
-}
-
 void PrimaryPort::disconnect() {
-    socketClose();
-    io_context_.stop();
+    // Close socket and set thread flag
+    {
+        std::lock_guard<std::mutex> lock(socket_mutex_);
+        socket_async_thread_alive_ = false;
+        socket_ptr_.reset();
+    }
     if (socket_async_thread_ && socket_async_thread_->joinable()) {
         socket_async_thread_->join();
     }
@@ -108,86 +95,68 @@ bool PrimaryPort::getPackage(std::shared_ptr<PrimaryPackage> pkg, int timeout_ms
     return pkg->waitUpdate(timeout_ms);
 }
 
-void PrimaryPort::parserMessageHead() {
+bool PrimaryPort::parserMessage() {
     std::lock_guard<std::mutex> lock(socket_mutex_);
-    if (!socket_ptr_) {
-        return;
+    if (!socket_ptr_ || !socket_ptr_->is_open()) {
+        ELITE_LOG_WARN("Don't connect to robot primary port");
+        return false;
+    }
+    if (socket_ptr_->available() <= HEAD_LENGTH) {
+        return true;
+    }
+    // Receive package head and parser it
+    boost::system::error_code ec;
+    int head_len = boost::asio::read(*socket_ptr_, boost::asio::buffer(message_head_, HEAD_LENGTH), ec);
+    if (ec) {
+        ELITE_LOG_ERROR("Primary port receive package head had expection: %s", boost::system::system_error(ec).what());
+        return false;
+    }
+    uint32_t package_len = 0;
+    UTILS::EndianUtils::unpack(message_head_.begin(), package_len);
+    if (package_len <= HEAD_LENGTH) {
+        ELITE_LOG_ERROR("Primary port package len error: %d", package_len);
+        return false;
     }
 
-    auto head_func = 
-        [&](const boost::system::error_code &ec, std::size_t nb) {
-            if (!ec && nb == HEAD_LENGTH) {
-                uint32_t len = 0;
-                UTILS::EndianUtils::unpack(message_head_.begin(), len);
-                if (len <= HEAD_LENGTH) {
-                    throw EliteException(EliteException::Code::SOCKET_FAIL);
-                }
-                parserMessageBody(message_head_[4], len);
-            } else {
-                throw EliteException(EliteException::Code::SOCKET_FAIL, ec.message());
-            }
-    };
-
-    boost::asio::async_read(
-        *socket_ptr_,
-        boost::asio::buffer(message_head_),
-        head_func
-    );
+    return parserMessageBody(message_head_[4], package_len);
 }
 
-void PrimaryPort::parserMessageBody(int type, int len) {
-    std::lock_guard<std::mutex> lock(socket_mutex_);
-    if (!socket_ptr_) {
-        return;
-    }
-
-    int body_len = len - HEAD_LENGTH;
+bool PrimaryPort::parserMessageBody(int type, int package_len) {
+    boost::system::error_code ec;
+    int body_len = package_len - HEAD_LENGTH;
     message_body_.resize(body_len);
-    // If not RobotState message consume it with no parser.
-    if (type != ROBOT_STATE_MSG_TYPE) {
-        boost::asio::async_read(
-            *socket_ptr_, 
-            boost::asio::buffer(message_body_, body_len), 
-            [&](const boost::system::error_code &ec, std::size_t nb) {
-                parserMessageHead();
-            }
-        );
-    } else {
-        boost::asio::async_read(
-            *socket_ptr_, 
-            boost::asio::buffer(message_body_, body_len), 
-            [&, body_len](const boost::system::error_code &ec, std::size_t nb) {
-                if (nb != body_len) {
-                    throw EliteException(EliteException::Code::SOCKET_FAIL);
-                }
-                uint32_t sub_len = 0;
-                for (auto iter = message_body_.begin(); iter < message_body_.end(); iter += sub_len) {
-                    UTILS::EndianUtils::unpack(iter, sub_len);
-                    int sub_type = *(iter + 4);
-
-                    std::lock_guard<std::mutex> lock(mutex_);
-                    auto psm = parser_sub_msg_.find(sub_type);
-                    if (psm != parser_sub_msg_.end()) {
-                        psm->second->parser(sub_len, iter);
-                        psm->second->notifyUpated();
-                        parser_sub_msg_.erase(sub_type);
-                    }
-                }
-                parserMessageHead();
-            }
-        );
+    // Receive package body
+    boost::asio::read(*socket_ptr_, boost::asio::buffer(message_body_, body_len), ec);
+    if (ec) {
+        ELITE_LOG_ERROR("Primary port receive package body had expection: %s", boost::system::system_error(ec).what());
+        return false;
     }
+    // If RobotState message parser others don't do anything.
+    if (type == ROBOT_STATE_MSG_TYPE) {
+        uint32_t sub_len = 0;
+        for (auto iter = message_body_.begin(); iter < message_body_.end(); iter += sub_len) {
+            UTILS::EndianUtils::unpack(iter, sub_len);
+            int sub_type = *(iter + 4);
+
+            std::lock_guard<std::mutex> lock(mutex_);
+            auto psm = parser_sub_msg_.find(sub_type);
+            if (psm != parser_sub_msg_.end()) {
+                psm->second->parser(sub_len, iter);
+                psm->second->notifyUpated();
+                parser_sub_msg_.erase(sub_type);
+            }
+        }
+    }
+    return true;
 }
 
 void PrimaryPort::socketAsyncLoop() {
     while (socket_async_thread_alive_) {
         try {
-            if (io_context_.stopped()) {
-                auto work = boost::asio::make_work_guard(io_context_);
-                io_context_.run();
-                work.reset();
+            if (!parserMessage()) {
+                socket_async_thread_alive_ = false;
             }
-            io_context_.run();
+            std::this_thread::sleep_for(10ms);
         } catch(const std::exception& e) {
             socket_async_thread_alive_ = false;
         }

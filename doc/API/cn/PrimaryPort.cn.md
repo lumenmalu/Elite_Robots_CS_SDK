@@ -45,6 +45,10 @@ bool connect(const std::string& ip, int port = PRIMARY_PORT)
 
 - ***返回值***：成功返回 true，失败返回 false。
 
+- ***注意***
+    1. 如果重复调用此函数而没有调用disconnect，那么会断开原来的连接。
+    2. 重复调用此函数的频率最好不要超过2HZ。
+
 ---
 
 ### ***断开连接***
@@ -54,6 +58,10 @@ void disconnect()
 - ***功能***
 
     断开与机器人的连接
+
+- ***注意***
+
+    建议在调用此函数之后进行500ms左右延迟再调用connect。
 
 ---
 
