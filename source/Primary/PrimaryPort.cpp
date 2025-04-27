@@ -3,6 +3,8 @@
 #include "Utils.hpp"
 #include "Log.hpp"
 
+using namespace std::chrono;
+
 namespace ELITE
 {
 using namespace std::chrono;
@@ -119,9 +121,9 @@ bool PrimaryPort::parserMessage() {
     return parserMessageBody(message_head_[4], package_len);
 }
 
-bool PrimaryPort::parserMessageBody(int type, int len) {
+bool PrimaryPort::parserMessageBody(int type, int package_len) {
     boost::system::error_code ec;
-    int body_len = len - HEAD_LENGTH;
+    int body_len = package_len - HEAD_LENGTH;
     message_body_.resize(body_len);
     // Receive package body
     boost::asio::read(*socket_ptr_, boost::asio::buffer(message_body_, body_len), ec);
@@ -154,6 +156,7 @@ void PrimaryPort::socketAsyncLoop() {
             if (!parserMessage()) {
                 socket_async_thread_alive_ = false;
             }
+            std::this_thread::sleep_for(10ms);
         } catch(const std::exception& e) {
             socket_async_thread_alive_ = false;
         }

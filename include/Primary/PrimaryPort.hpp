@@ -57,7 +57,7 @@ private:
      * @param type 
      * @param len 
      */
-    bool parserMessageBody(int type, int len);
+    bool parserMessageBody(int type, int package_len);
 
 public:
     PrimaryPort();
