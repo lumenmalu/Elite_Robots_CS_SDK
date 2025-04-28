@@ -20,7 +20,7 @@ public:
             socket_ptr->open(boost::asio::ip::tcp::v4());
             boost::asio::socket_base::reuse_address sol_reuse_option(true);
             socket_ptr->set_option(sol_reuse_option);
-            boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+            boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ip), port);
             socket_ptr->async_connect(endpoint, [&](const boost::system::error_code& error) {
                 if (error) {
                     throw EliteException(EliteException::Code::SOCKET_CONNECT_FAIL);

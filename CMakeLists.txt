@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(elite-cs-series-sdk VERSION 1.1.0)
+project(elite-cs-series-sdk VERSION 1.2.0)
 
 option(ELITE_COMPILE_TESTS "Compile tests" OFF)
 option(ELITE_COMPILE_DOC "Compile documentation" OFF)
@@ -22,10 +22,12 @@ else()
     message(FATAL_ERROR  "C++ standard must C++14 or higher")
 endif()
 
-find_package(GTest)
-find_package(Boost)
-if(NOT BOOST_FOUND)
-    message(AUTHOR_WARNING "Not found boost library. Subsequent compilations may fail.")
+# Find third-party library
+find_package(Boost REQUIRED)
+find_package(libssh)
+if(libssh_FOUND)
+    set(THIRDPARTY_LIB ${THIRDPARTY_LIB} ssh)
+    add_definitions(-DELITE_USE_LIB_SSH)
 endif()
 
 configure_file(
@@ -33,11 +35,13 @@ configure_file(
     ${PROJECT_BINARY_DIR}/include/Elite/EliteOptions.hpp
 )
 
+# Source file list
 set(
     ELITE_LIB_SOURCE_FILE
     source/Common/Utils.cpp
     source/Common/TcpServer.cpp
     source/Common/EliteException.cpp
+    source/Common/SshUtils.cpp
     source/Primary/PrimaryPort.cpp
     source/Primary/PrimaryPortInterface.cpp
     source/Primary/RobotConfPackage.cpp
@@ -55,6 +59,7 @@ set(
     source/Elite/Log.cpp
     source/Elite/Logger.cpp
     source/Elite/RemoteUpgrade.cpp
+    source/Elite/ControllerLog.cpp
 )
 
 set(
@@ -68,6 +73,25 @@ set(
     ${PROJECT_SOURCE_DIR}/include/Control
     ${PROJECT_SOURCE_DIR}/include/
     ${PROJECT_BINARY_DIR}/include/
+)
+
+# Head file list
+set(
+    ELITE_HEADER_FILES
+    Elite/DataType.hpp
+    Elite/VersionInfo.hpp
+    Dashboard/DashboardClient.hpp
+    Rtsi/RtsiClientInterface.hpp
+    Rtsi/RtsiIOInterface.hpp
+    Rtsi/RtsiRecipe.hpp
+    Primary/PrimaryPackage.hpp
+    Primary/RobotConfPackage.hpp
+    Primary/PrimaryPortInterface.hpp
+    EliteException.hpp
+    Elite/EliteDriver.hpp
+    Elite/Log.hpp
+    Elite/RemoteUpgrade.hpp
+    Elite/ControllerLog.hpp
 )
 
 # Set output library default name
@@ -116,23 +140,15 @@ target_include_directories(
     PRIVATE
     ${ELITE_LIB_INCLUDE_DIR}
 )
-
-# Head file list
-set(
-    ELITE_HEADER_FILES
-    Elite/DataType.hpp
-    Elite/VersionInfo.hpp
-    Dashboard/DashboardClient.hpp
-    Rtsi/RtsiClientInterface.hpp
-    Rtsi/RtsiIOInterface.hpp
-    Rtsi/RtsiRecipe.hpp
-    Primary/PrimaryPackage.hpp
-    Primary/RobotConfPackage.hpp
-    Primary/PrimaryPortInterface.hpp
-    EliteException.hpp
-    Elite/EliteDriver.hpp
-    Elite/Log.hpp
-    Elite/RemoteUpgrade.hpp
+target_link_libraries(
+    ${PROJECT_NAME}_SHARED
+    PRIVATE
+    ${THIRDPARTY_LIB}
+)
+target_link_libraries(
+    ${PROJECT_NAME}_STATIC
+    PRIVATE
+    ${THIRDPARTY_LIB}
 )
 
 # Copy head file
@@ -170,7 +186,7 @@ if(ELITE_COMPILE_DOC)
 endif()
 
 # If googel test has been foune, compile unit test
-if (GTEST_FOUND AND ELITE_COMPILE_TESTS)
+if (ELITE_COMPILE_TESTS)
     message(STATUS "Compile the tests")
     add_subdirectory(test ${CMAKE_BINARY_DIR}/test/)
 endif()
@@ -228,3 +244,4 @@ message(STATUS "CMAKE_C_FLAGS:                      ${CMAKE_C_FLAGS}")
 message(STATUS "CMAKE_CXX_FLAGS:                    ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR:           ${CMAKE_INSTALL_INCLUDEDIR}")
 message(STATUS "CMAKE_INSTALL_LIBDIR:               ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "THIRDPARTY_LIB                      ${THIRDPARTY_LIB}")

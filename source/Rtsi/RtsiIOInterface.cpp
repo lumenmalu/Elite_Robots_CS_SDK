@@ -598,25 +598,3 @@ void RtsiIOInterface::recvLoop() {
     }
     ELITE_LOG_INFO("RTSI IO interface sync thread dropped");
 }
-
-template<typename T>
-void RtsiIOInterface::getRecipeValue(const std::string& name, T& out_value) {
-    if (output_recipe_) {
-        output_recipe_->getValue(name, out_value);
-    }
-}
-
-template<typename T>
-bool RtsiIOInterface::setInputRecipeValue(const std::string &name, const T& value) {
-    bool ret = input_recipe_->setValue(name, value);
-    input_new_cmd_ = true;
-    return ret;
-}
-
-template void RtsiIOInterface::getRecipeValue<double>(const std::string &name, double& out_value);
-template void RtsiIOInterface::getRecipeValue<bool>(const std::string &name, bool& out_value);
-template void RtsiIOInterface::getRecipeValue<int>(const std::string &name, int& out_value);
-
-template bool RtsiIOInterface::setInputRecipeValue<double>(const std::string &name, const double& value);
-template bool RtsiIOInterface::setInputRecipeValue<bool>(const std::string &name, const bool& value);
-template bool RtsiIOInterface::setInputRecipeValue<int>(const std::string &name, const int& value);

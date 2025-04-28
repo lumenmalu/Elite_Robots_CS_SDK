@@ -27,7 +27,6 @@ private:
     std::mutex socket_mutex_;
     boost::asio::io_context io_context_;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket_ptr_;
-    std::unique_ptr<boost::asio::ip::tcp::resolver> resolver_ptr_;
     
     // The buffer of package head
     std::vector<uint8_t> message_head_;
@@ -47,10 +46,10 @@ private:
     void socketAsyncLoop();
 
     /**
-     * @brief Receive and parser package head.
+     * @brief Receive and parser package.
      * 
      */
-    void parserMessageHead();
+    bool parserMessage();
 
     /**
      * @brief Receive and parser package body.
@@ -58,7 +57,7 @@ private:
      * @param type 
      * @param len 
      */
-    void parserMessageBody(int type, int len);
+    bool parserMessageBody(int type, int package_len);
 
 public:
     PrimaryPort();
@@ -71,12 +70,16 @@ public:
      * @param port The port(30001 or 30002)
      * @return true success
      * @return false fail
+     * @note 
+     *      1. Warning: Repeated calls to this function without intermediate disconnect() will force-close the active connection.
+     *      2. Usage constraint: Call rate must be ≤ 2Hz (once per 500ms minimum interval).
      */
     bool connect(const std::string& ip, int port);
 
     /**
      * @brief Disconnect socket.
      *  And wait for the background thread to finish.
+     * @note After calling this function, a delay of around 500ms should be added prior to calling connect().
      */
     void disconnect();
 
@@ -98,12 +101,6 @@ public:
      * @return false fail
      */
     bool getPackage(std::shared_ptr<PrimaryPackage> pkg, int timeout_ms);
-
-    /**
-     * @brief Close and reset socket
-     * 
-     */
-    void socketClose();
 
 };
 

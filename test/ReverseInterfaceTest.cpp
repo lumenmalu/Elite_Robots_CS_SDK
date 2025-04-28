@@ -38,7 +38,7 @@ public:
             boost::asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK> quickack(true);
             socket_ptr->set_option(quickack);
 #endif
-            boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+            boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ip), port);
             socket_ptr->async_connect(endpoint, [&](const boost::system::error_code& error) {
                 if (error) {
                     throw boost::system::system_error(error);

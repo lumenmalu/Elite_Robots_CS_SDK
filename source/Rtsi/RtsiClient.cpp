@@ -24,7 +24,7 @@ void RtsiClient::connect(const std::string& ip, int port) {
 #if defined(__linux) || defined(linux) || defined(__linux__)
         socket_ptr_->set_option(boost::asio::detail::socket_option::boolean<IPPROTO_TCP, TCP_QUICKACK>(true));
 #endif
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ip), port);
         socket_ptr_->async_connect(endpoint, [&](const boost::system::error_code& error) {
             if (!error) {
                 connection_state = ConnectionState::CONNECTED;
@@ -239,10 +239,9 @@ int RtsiClient::receiveSocket(std::vector<uint8_t>& buff, int size, int offset, 
         socketDisconnect();
 
         // Clear socket receive or send operation
-        io_context_.reset();
-
-        // Run the io_context again.Make it in stopped
+        auto work = boost::asio::make_work_guard(io_context_);
         io_context_.run();
+        work.reset();
 
         return -1;
     }

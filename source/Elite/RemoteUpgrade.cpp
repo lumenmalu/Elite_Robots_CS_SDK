@@ -1,14 +1,11 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
-#if defined(__linux) || defined(linux) || defined(__linux__)
-#include <unistd.h>
-#include <sys/wait.h>
-#include <pty.h>
-#endif
 
+#include "Common/SshUtils.hpp"
 #include "Elite/Logger.hpp"
 
+using namespace ELITE::SSH_UTILS;
 
 namespace ELITE
 {
@@ -17,65 +14,27 @@ namespace UPGRADE
 {
 
 bool upgradeControlSoftware(std::string ip, std::string file, std::string password) {
-    ELITE_LOG_INFO("Upgrade control software begin");
-#if defined(__linux) || defined(linux) || defined(__linux__)
-    int master_fd;
-    pid_t pid = forkpty(&master_fd, nullptr, nullptr, nullptr);
-    if (pid < 0) {
-        ELITE_LOG_FATAL("Upgrade control software fail: fork failed");
-        return false;
-    }
+	auto upload_error_cb = [&](int f_z, int r_z, const char* err) {
+		if (err) {
+			ELITE_LOG_ERROR("Upload update file fail %d/%d. Reason: %s ", r_z, f_z, err);
+		}
+	};
+	// Upload update package
+	if (!uploadFile(ip, "root", password, "/tmp/CS_UPDATE.eup", file, upload_error_cb)) {
+		return false;
+	}
 
-    if (pid == 0) {
-        // child process (run the update file)
+	// Add executable permissions to the upgrade package.
+	std::string cmd = "chmod +x /tmp/CS_UPDATE.eup";
+	std::string cmd_out = executeCommand(ip, "root", password, cmd);
+	ELITE_LOG_DEBUG("Execute cmd: %s\n Output:%s", cmd.c_str(), cmd_out.c_str());
 
-        // Execute update script
-        std::string script_arg = ("-ip=" + ip);
-        execlp(file.c_str(), file.c_str(), script_arg.c_str(), NULL);
-        ELITE_LOG_FATAL("Upgrade control software fail");
-        return false;
-    } else {        
-        char buffer[4096];
-        std::string script_output;
-        ssize_t bytes_read;
-
-        while (true) {
-            // Read update script output
-            bytes_read = read(master_fd, buffer, sizeof(buffer) - 1);
-            // Script finish
-            if (bytes_read <= 0) {
-                ELITE_LOG_INFO("Upgrade control software finish");
-                break;
-            }
-            buffer[bytes_read] = '\0';
-            script_output += buffer;
-            ELITE_LOG_DEBUG(buffer);
-            // If you have never connected to the robot over ssh, you will have the following prompt
-            if (script_output.find("Are you sure you want to continue connecting") != std::string::npos) {
-                if(write(master_fd, "yes\n", sizeof("yes\n")) <= 0) {
-                    ELITE_LOG_ERROR("Upgrade control software fail: write() fail");
-                    break;
-                }
-            } else if (script_output.find("password") != std::string::npos) { // Need enter password
-                password += "\n";
-                if(write(master_fd, password.c_str(), password.size()) <= 0) {
-                    ELITE_LOG_ERROR("Upgrade control software fail: write() fail");
-                    break;
-                }
-                
-            }
-            script_output.clear();
-        }
-    }
-    close(master_fd);
-    // wait child finish
-    wait(NULL);
-#else
-    return false;
-#endif
-    return true;
+	// Execute the upgrade package in the bash environment.
+	cmd = "bash -lc '/tmp/CS_UPDATE.eup --app'";
+	cmd_out = executeCommand(ip, "root", password, cmd);
+	ELITE_LOG_DEBUG("Execute cmd: %s\n Output:%s", cmd.c_str(), cmd_out.c_str());
+	return true;
 }
-
 
 } // namespace UPGRADE
 
