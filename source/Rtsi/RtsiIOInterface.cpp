@@ -17,8 +17,12 @@ template bool RtsiIOInterface::getRecipeValue<int16_t>(const std::string &name, 
 template bool RtsiIOInterface::getRecipeValue<uint16_t>(const std::string &name, uint16_t& out_value);
 template bool RtsiIOInterface::getRecipeValue<int32_t>(const std::string &name, int32_t& out_value);
 template bool RtsiIOInterface::getRecipeValue<uint32_t>(const std::string &name, uint32_t& out_value);
+template bool RtsiIOInterface::getRecipeValue<int64_t>(const std::string &name, int64_t& out_value);
+template bool RtsiIOInterface::getRecipeValue<uint64_t>(const std::string &name, uint64_t& out_value);
+template bool RtsiIOInterface::getRecipeValue<vector3d_t>(const std::string &name, vector3d_t& out_value);
 template bool RtsiIOInterface::getRecipeValue<vector6d_t>(const std::string &name, vector6d_t& out_value);
 template bool RtsiIOInterface::getRecipeValue<vector6int32_t>(const std::string &name, vector6int32_t& out_value);
+template bool RtsiIOInterface::getRecipeValue<vector6uint32_t>(const std::string &name, vector6uint32_t& out_value);
 
 // setInputRecipeValue() interface instantiate
 template bool RtsiIOInterface::setInputRecipeValue<double>(const std::string &name, const double& value);
