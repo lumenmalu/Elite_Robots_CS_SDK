@@ -10,6 +10,7 @@ using namespace ELITE;
 static std::string s_robot_ip;
 
 
+
 TEST(RtsiIOTest, rw_io) {
     EXPECT_FALSE(s_robot_ip.empty());
 
@@ -62,10 +63,11 @@ TEST(RtsiMultipleConnect, connect) {
 
 
 int main(int argc, char** argv) {
-    if (argc < 2 || argv[1] == nullptr) {
-        return 1;
-    }
-    s_robot_ip = argv[1];
+    // if (argc < 2 || argv[1] == nullptr) {
+    //     return 1;
+    // }
+    s_robot_ip = "192.168.186.140";
+
     
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

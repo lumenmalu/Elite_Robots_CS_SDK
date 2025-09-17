@@ -5,7 +5,7 @@
 
 using namespace ELITE;
 
-static std::string s_robot_ip = "192.168.128.138";
+static std::string s_robot_ip = "192.168.186.140";
 
 class DashboardClientTest : public ::testing::Test {
 protected:
@@ -27,7 +27,7 @@ TEST_F(DashboardClientTest, connect) {
 
 TEST_F(DashboardClientTest, run_program) {
     EXPECT_TRUE(dashboard_client_->connect(s_robot_ip));
-    EXPECT_TRUE(dashboard_client_->loadTask("wait_program.task"));
+    EXPECT_TRUE(dashboard_client_->loadTask("test.task"));
     EXPECT_TRUE(dashboard_client_->powerOff());
     std::this_thread::sleep_for(std::chrono::seconds(5));
     EXPECT_TRUE(dashboard_client_->powerOn());

@@ -10,6 +10,8 @@
 
 using namespace ELITE;
 using namespace std::chrono;
+const std::string DEFAULT_ROBOT_IP = "192.168.186.140";
+const std::string DEFAULT_LOCAL_IP = "192.168.186.1";
 
 static std::unique_ptr<EliteDriver> s_driver;
 static std::unique_ptr<RtsiClientInterface> s_rtsi_client;
@@ -62,20 +64,20 @@ void waitRobotArrive(std::vector<std::shared_ptr<RtsiRecipe>> recipe_list, const
 }
 
 int main(int argc, char** argv) {
-    if (argc < 3) {
-        std::cout << "Must provide robot ip or local ip. Command like: ./servo_example 192.168.1.250 192.168.1.251" << std::endl;
-        return 1;
-    }
-    s_driver = std::make_unique<EliteDriver>(argv[1], argv[2], "external_control.script");
+    // if (argc < 3) {
+    //     std::cout << "Must provide robot ip or local ip. Command like: ./servo_example 192.168.1.250 192.168.1.251" << std::endl;
+    //     return 1;
+    // }
+    s_driver = std::make_unique<EliteDriver>(DEFAULT_ROBOT_IP, DEFAULT_LOCAL_IP, "external_control.script");
     s_rtsi_client = std::make_unique<RtsiClientInterface>();
     s_dashboard = std::make_unique<DashboardClient>();
     
-    if (!s_dashboard->connect(argv[1])) {
+    if (!s_dashboard->connect(DEFAULT_ROBOT_IP)) {
         return 1;
     }
     std::cout << "Dashboard connected" << std::endl;
 
-    s_rtsi_client->connect(argv[1]);
+    s_rtsi_client->connect(DEFAULT_ROBOT_IP);
     std::cout << "RTSI connected" << std::endl;
 
     if (!s_rtsi_client->negotiateProtocolVersion()) {

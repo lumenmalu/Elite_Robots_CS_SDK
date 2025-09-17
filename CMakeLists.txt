@@ -4,7 +4,7 @@ project(elite-cs-series-sdk VERSION 1.2.0)
 
 option(ELITE_COMPILE_TESTS "Compile tests" OFF)
 option(ELITE_COMPILE_DOC "Compile documentation" OFF)
-option(ELITE_COMPILE_EXAMPLES "Compile examples" OFF)
+option(ELITE_COMPILE_EXAMPLES "Compile examples" ON)
 
 include(cmake/utils.cmake)
 
@@ -23,7 +23,24 @@ else()
 endif()
 
 # Find third-party library
+# BOOST动态库
+set(BOOST_ROOT D:/code_lib/boost/boost_dll/debug)
+set(Boost_LIBRARY_DIRS D:/code_lib/boost/boost_dll/debug/lib)
+set(Boost_DEBUG ON)
+cmake_policy(SET CMP0144 NEW)
 find_package(Boost REQUIRED)
+MESSAGE( STATUS "Boost_INCLUDE_DIRS = ${Boost_INCLUDE_DIRS}.")
+MESSAGE( STATUS "Boost_LIBRARY_DIRS = ${Boost_LIBRARY_DIRS}.")
+MESSAGE( STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}.")
+MESSAGE( STATUS "Boost_LIB_VERSION = ${Boost_LIB_VERSION}.")
+link_directories(${Boost_LIBRARY_DIRS}/lib)
+include_directories(${Boost_INCLUDE_DIRS})
+if(NOT BOOST_FOUND)
+    message(AUTHOR_WARNING "Not found boost library. Subsequent compilations may fail.")
+endif()
+
+
+
 find_package(libssh)
 if(libssh_FOUND)
     set(THIRDPARTY_LIB ${THIRDPARTY_LIB} ssh)
@@ -42,18 +59,23 @@ set(
     source/Common/TcpServer.cpp
     source/Common/EliteException.cpp
     source/Common/SshUtils.cpp
+
     source/Primary/PrimaryPort.cpp
     source/Primary/PrimaryPortInterface.cpp
     source/Primary/RobotConfPackage.cpp
+
     source/Rtsi/RtsiClient.cpp
     source/Rtsi/RtsiClientInterface.cpp
     source/Rtsi/RtsiRecipeInternal.cpp
     source/Rtsi/RtsiIOInterface.cpp
+
     source/Dashboard/DashboardClient.cpp
+
     source/Control/ReverseInterface.cpp
     source/Control/TrajectoryInterface.cpp
     source/Control/ScriptSender.cpp
     source/Control/ScriptCommandInterface.cpp
+
     source/Elite/VersionInfo.cpp
     source/Elite/EliteDriver.cpp
     source/Elite/Log.cpp
@@ -78,20 +100,27 @@ set(
 # Head file list
 set(
     ELITE_HEADER_FILES
+
     Elite/DataType.hpp
     Elite/VersionInfo.hpp
-    Dashboard/DashboardClient.hpp
-    Rtsi/RtsiClientInterface.hpp
-    Rtsi/RtsiIOInterface.hpp
-    Rtsi/RtsiRecipe.hpp
-    Primary/PrimaryPackage.hpp
-    Primary/RobotConfPackage.hpp
-    Primary/PrimaryPortInterface.hpp
-    EliteException.hpp
     Elite/EliteDriver.hpp
     Elite/Log.hpp
     Elite/RemoteUpgrade.hpp
     Elite/ControllerLog.hpp
+
+    Dashboard/DashboardClient.hpp
+
+    Rtsi/RtsiClientInterface.hpp
+    Rtsi/RtsiIOInterface.hpp
+    Rtsi/RtsiRecipe.hpp
+
+    Primary/PrimaryPackage.hpp
+    Primary/RobotConfPackage.hpp
+    Primary/PrimaryPortInterface.hpp
+
+    EliteException.hpp
+
+
 )
 
 # Set output library default name
@@ -106,7 +135,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         -DELITE_EXPORT_LIBRARY
     )
     set(SDK_STATIC_LIB_OUTPUT_NAME "${PROJECT_NAME}_static")
-    set(SDK_SHARED_LIB_OUTPUT_NAME "${PROJECT_NAME}")
+    set(SDK_SHARED_LIB_OUTPUT_NAME "${PROJECT_NAME}")    # 添加debug,区分
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "SYSTEM: Linux")
     set(SYSTEM_LIB pthread)
@@ -126,6 +155,7 @@ add_library(
     STATIC
     ${ELITE_LIB_SOURCE_FILE}
 )
+
 define_rel_file_macro(${PROJECT_NAME}_SHARED)
 define_rel_file_macro(${PROJECT_NAME}_STATIC)
 set_target_properties(${PROJECT_NAME}_SHARED PROPERTIES OUTPUT_NAME ${SDK_SHARED_LIB_OUTPUT_NAME})

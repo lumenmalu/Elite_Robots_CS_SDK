@@ -6,7 +6,7 @@ using namespace ELITE;
 
 // In a real-world example it would be better to get those values from command line parameters / a
 // better configuration system such as Boost.Program_options
-const std::string DEFAULT_ROBOT_IP = "192.168.51.244";
+const std::string DEFAULT_ROBOT_IP = "192.168.186.140";
 
 int main(int argc, char* argv[]) {
     // Parse the ip arguments if given
